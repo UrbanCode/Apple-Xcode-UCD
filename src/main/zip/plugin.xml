@@ -7,14 +7,21 @@
 - U.S. Government Users Restricted Rights - Use, duplication or disclosure restricted by
 - GSA ADP Schedule Contract with IBM Corp.
 -->
-<plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<plugin xmlns="http://www.urbancode.com/PluginXMLSchema_v1"
+        xmlns:server="http://www.urbancode.com/PluginServerXMLSchema_v1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <header>
     <identifier id="com.urbancode.air.plugin.pluginName" name="Plugin Name" version="1"/>
     <description>
-      Description
-	  </description>
-    <tag>step/location</tag>
+        Provides mobile support for working with iOS.
+        Refer to the ios_plugin.pdf file, which is embedded in the plug-in .zip file for more documentation.
+    </description>
+    <tag>Mobile/iOS</tag>
+    <server:required-server-version>6.0.1.0</server:required-server-version>
   </header>
+  
+  <!-- Application management based steps -->
+  
   <step-type name="StepTypeName">
     <description>Description</description>
     <properties>
