@@ -21,9 +21,51 @@
   </header>
   
   <!-- Simulator based steps -->
+
+  <step-type name="Start Simulator">
+    <description>
+        Starts a simulator. The step fails if a simulator is already running.
+    </description>
+    <properties>
+      <property name="deviceType">
+        <property-ui type="textBox"
+                     label="Device Type"
+                     description="The simulator device type, for example, iPad or iPhone."/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS or SDK version, for example, 6.1 or 7.1."/>
+      </property>
+      <property name="xcode">
+        <property-ui type="textBox"
+                     label="Path To Xcode"
+                     description="The path to the Xcode.app installation."
+                     default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="startSimulator.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
   
   <step-type name="Stop Simulator">
-    <description>Stops the running simulator. The step fails if no simulator is running.</description>
+    <description>
+        Stops the running simulator. The step fails if no simulator is running.
+    </description>
     <properties/>
     <post-processing><![CDATA[
         if (properties.get("exitCode") != 0) {
