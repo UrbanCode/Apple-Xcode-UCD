@@ -11,7 +11,7 @@
         xmlns:server="http://www.urbancode.com/PluginServerXMLSchema_v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <header>
-    <identifier id="com.urbancode.air.plugin.pluginName" name="Plugin Name" version="1"/>
+    <identifier id="com.ibm.rational.iOS" name="iOS" version="1"/>
     <description>
         Provides mobile support for working with iOS.
         Refer to the ios_plugin.pdf file, which is embedded in the plug-in .zip file for more documentation.
@@ -19,6 +19,117 @@
     <tag>Mobile/iOS</tag>
     <server:required-server-version>6.0.1.0</server:required-server-version>
   </header>
+  
+  <!-- Test based steps -->
+  
+  <step-type name="UI Test">
+    <description>Runs the specified UI test against the application.</description>
+    <properties>
+      <property name="app" required="true">
+        <property-ui type="textBox"
+                     label="Application"
+                     description="The iOS application (.app or .ipa) to test."
+                     default-value="${p:component/application}"/>
+      </property>
+      <property name="script" required="true">
+        <property-ui type="textBox"
+                     label="Test Script"
+                     description="The test script file (.js) to run."/>
+      </property>
+      <property name="outputDir" required="true">
+        <property-ui type="textBox"
+                     label="Output Directory"
+                     description="The directory where the test output should be written to."
+                     default-value="."/>
+      </property>
+      <property name="target">
+        <property-ui type="textBox"
+                     label="Device Target"
+                     description="The target device to run the test against, 
+                        for example, iPhone - Simulator - iOS 7.1."/>
+      </property>
+      <property name="xcode">
+        <property-ui type="textBox"
+                     label="Path To Xcode"
+                     description="The path to the Xcode installation. If the 
+                        value is not specified, a default value of 
+                        /Applications/Xcode.app is used."
+                     default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
+      </property>
+      <property name="traceTemplate">
+        <property-ui type="textBox"
+                     label="Trace Template"
+                     description="The path, relative to the Xcode installation 
+                        path, for the .tracetemplate file to use when running
+                        the UI test. If no value is specified, a default value
+                        of /Contents/Applications/Instruments.app/Contents/PlugIns/
+                        AutomationInstrument.bundle/Contents/Resources/
+                        Automation.tracetemplate is used."
+                     default-value="${p?:resource/XcodeTraceTemplate}"
+                     hidden="true"/>
+      </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path To xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
+                     hidden="true"/>
+      </property>
+      <property name="timeout">
+        <property-ui type="textBox"
+                     label="Timeout"
+                     description="A timeout (in milliseconds), after which the 
+                        UI test are stopped. By default, the step does not 
+                        time out when no value is specified."
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        properties.put("Status", "Success");
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            function testOutput(lineNumber, line) {
+                commandOut.println("Recieved Error");
+                commandOut.println(lineNumber.toString() + " : " + line);
+                var errors = properties.get("Error");
+                if (errors == null) {
+                    errors = new java.util.ArrayList();
+                }
+                errors.add(line);
+                properties.put("Error", errors);
+
+                properties.put("Status", "Failure");
+            }
+            scanner.register("(?i)Error:", function(lineNumber, line) {
+                testOutput(lineNumber, line)
+            });
+            scanner.register("Fail:", function(lineNumber, line) {
+                testOutput(lineNumber, line)
+            });
+            scanner.register("Instruments Trace Error", function(lineNumber, line) {
+                testOutput(lineNumber, line)
+            });
+            scanner.scan();
+
+            var errors = properties.get("Error");
+            if (errors != null) {
+                properties.put("Error", errors.toString());
+            }
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="uiTest.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
   
   <!-- Simulator based steps -->
 
@@ -40,7 +151,9 @@
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode.app installation."
+                     description="The path to the Xcode installation. If the 
+                        value is not specified, a default value of 
+                        /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>

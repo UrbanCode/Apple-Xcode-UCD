@@ -1,0 +1,65 @@
+/*
+* Licensed Materials - Property of IBM Corp.
+* IBM UrbanCode Deploy
+* (c) Copyright IBM Corporation 2011, 2014. All Rights Reserved.
+*
+* U.S. Government Users Restricted Rights - Use, duplication or disclosure restricted by
+* GSA ADP Schedule Contract with IBM Corp.
+*/
+
+import com.urbancode.air.AirPluginTool;
+import com.urbancode.air.CommandHelper;
+import com.ibm.rational.air.plugin.ios.Util;
+
+def apTool = new AirPluginTool(this.args[0], this.args[1]);
+final def props = apTool.getStepProperties();
+
+def app = props['app']
+def script = props['script']
+def outputDir = props['outputDir']?: "."
+def target = props['target']
+def xcode = props['xcode']?: "/Applications/Xcode.app"
+def traceTemplate = props['traceTemplate']
+def xcrunPath = props['xcrunPath']
+def timeout = props['timeout']
+
+Util.assertMacOS();
+
+def args = ["instruments"];
+if(target) {
+    args << "-w";
+    args << '\"' + target + '\"';
+}
+
+def xcodeApp = Util.verifyXcodePath(xcode);
+
+if(!traceTemplate) {
+    traceTemplate = new String(File.separator + "Contents" + File.separator + "Applications" +
+        File.separator + "Instruments.app" + File.separator + "Contents" + File.separator +
+        "PlugIns" + File.separator + "AutomationInstrument.bundle" + File.separator +
+        "Contents" + File.separator + "Resources" + File.separator +
+        "Automation.tracetemplate");
+}
+
+def traceTemplatePath;
+try {
+    traceTemplatePath = new File(xcodeApp, traceTemplate);
+} catch (Exception e) {
+    println "An error occurred during an attempt to access the trace " +
+        "template: " + e.getMessage();
+    System.exit(-1);
+}
+if(!traceTemplatePath.file) {
+    println "Error: The path to the trace template is incorrect: " +
+        traceTemplatePath.canonicalPath;
+    System.exit(-1);
+}
+
+args << "-t";
+args << traceTemplatePath.canonicalPath;
+
+args << Util.handleApplication(app);
+
+args << "-e" << "UIASCRIPT" << script << "-v";
+
+System.exit(Util.uiTest(xcrunPath, outputDir, "Running UI tests.", args, timeout));

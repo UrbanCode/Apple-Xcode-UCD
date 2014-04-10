@@ -32,19 +32,7 @@ if(Util.isSimulatorRunning()) {
 
 // Update the device type and target SDK OS before launching the simulator.
 if(deviceType?.trim() && targetOS?.trim()) {
-    def xcodeApp;
-    try {
-        xcodeApp = new File(xcode);
-    } catch (Exception e) {
-        println "An error occurred during an attempt to access the Xcode Application" +
-            "directory: " + e.getMessage();
-        System.exit(-1);
-    }
-    if(!xcodeApp.directory) {
-        println "Error: The path to the Xcode Application is incorrect: " + 
-            xcodeApp.canonicalPath;
-        System.exit(-1);
-    }
+    def xcodeApp = Util.verifyXcodePath(xcode);
     
     try {
         def pathToXcode = new String(File.separator + "Contents" + File.separator + 
@@ -74,6 +62,11 @@ if(deviceType?.trim() && targetOS?.trim()) {
     
     simCH.runCommand("Updating the simulator configuration.", simArgs);
     
+    def plistLoc = System.getenv().get("HOME") + File.separator + "Library" +
+        File.separator + "Preferences" + File.separator + "com.apple.iphonesimulator";
+    simArgs = ['defaults', 'read', plistLoc];
+    simCH.runCommand("Refreshing the simulator configuration.", simArgs);
+     
     println "The simulator will launch an ${deviceType} using SDK ${targetOS}.";
 } else {
     if((deviceType && !targetOS ) || (!deviceType && targetOS)) {

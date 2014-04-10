@@ -16,10 +16,7 @@ if(!Util.isSimulatorRunning()) {
     System.exit(-1);
 }
 
-def ch = new CommandHelper(new File('.'));
-def args = ['osascript', '-e', 'tell application \"iPhone Simulator\" to quit'];
-
-ch.runCommand("Stopping the simulator.", args);
+Util.stopSimulator();
 
 if(Util.isSimulatorRunning()) {
     println "The simulator failed to stop.";
