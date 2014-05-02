@@ -7,7 +7,6 @@
 * GSA ADP Schedule Contract with IBM Corp.
 */
 
-import com.urbancode.air.CommandHelper;
 import com.ibm.rational.air.plugin.ios.Util;
 
 Util.assertMacOS();

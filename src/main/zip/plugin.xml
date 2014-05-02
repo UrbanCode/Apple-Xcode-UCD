@@ -20,6 +20,94 @@
     <server:required-server-version>6.0.1.0</server:required-server-version>
   </header>
   
+  <!-- Application management based steps -->
+  
+  <step-type name="Install Application">
+    <description>Installs the iOS application (.ipa or .app).</description>
+    <properties>
+      <property name="app" required="true">
+        <property-ui type="textBox"
+                     label="Application Path"
+                     description="The iOS application (.app or .ipa) to install."
+                     default-value="${p:component/application}"/>
+      </property>
+      <property name="target">
+        <property-ui type="selectBox"
+                     label="Install Into"
+                     description="Install the application into a simulator or physical 
+                        device. The specific target is specified using the 
+                        &quot;ID&quot; property."
+                     default-value="sim"/>
+        <value label="Device">dev</value>
+        <value label="Simulator">sim</value>
+      </property>
+      <property name="id" required="true">
+        <property-ui type="textBox"
+                     label="ID"
+                     description="The ID of the device or simulator to use.
+                        The &quot;Install into&quot; property must be set to 
+                        the corresponding target. When you use the &quot;Simulator&quot; 
+                        option in the &quot;Install into&quot; property, specify the 
+                        complete target information. When you use the &quot;Device&quot;
+                        option in the &quot;Install into&quot; property, specify the 
+                        unique device identifier (UDID)."/>
+      </property>
+      <property name="reinstall">
+        <property-ui type="checkBox"
+                     label="Reinstall"
+                     description="Reinstall the app."/>
+      </property>
+      <property name="timeout">
+        <property-ui type="textBox"
+                     label="Timeout"
+                     description="A timeout (in milliseconds), after which the 
+                        device install attempt is stopped. By default, the step uses a
+                        time out of 5 minutes."
+                     default-value="300000"
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        properties.put("Status", "Success");
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            function testOutput(lineNumber, line) {
+                commandOut.println("Recieved Error");
+                commandOut.println(lineNumber.toString() + " : " + line);
+                var errors = properties.get("Error");
+                if (errors == null) {
+                    errors = new java.util.ArrayList();
+                }
+                errors.add(line);
+                properties.put("Error", errors);
+
+                properties.put("Status", "Failure");
+            }
+            scanner.register("(?i)Failure", function(lineNumber, line) {
+                testOutput(lineNumber, line)
+            });
+            scanner.register("(?i)Error", function(lineNumber, line) {
+                testOutput(lineNumber, line)
+            });
+            scanner.scan();
+
+            var errors = properties.get("Error");
+            if (errors != null) {
+                properties.put("Error", errors.toString());
+            }
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="installApp.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
+  
   <!-- Test based steps -->
   
   <step-type name="UI Test">
