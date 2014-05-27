@@ -14,8 +14,8 @@ def apTool = new AirPluginTool(this.args[0], this.args[1]);
 final def props = apTool.getStepProperties();
 
 def app = props['app']
-def target = props['target']
-def targetID = props['targetID']
+def udid = props['udid']
+def targetOS = props['targetOS']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
 def timeout = props['timeout']?: "300000"
 
@@ -32,32 +32,34 @@ if(app.contains(File.separator)) {
     appName = app;
 }
 
-if(target == "sim") {
-    // Determine if the simulator was running initially.
-    // TODO: Should we fail if it is running? Do we log a warning? 
-    // Util.isSimulatorRunning();
-    
-    boolean isInstalled = Util.findSimulatorApp(appName, false, targetID);
-    if(isInstalled && !reinstall) {
-        println "Error: The application ${app} is already installed."
-        System.exit(-1);
-    }
-    Util.installSimulatorApp(app, targetID);
-} else if (target == "dev") {
-    boolean isInstalled = Util.findDeviceApp(appName, false, targetID, null, timeout);
+// The target is a device.
+if (udid) {
+    boolean isInstalled = Util.findDeviceApp(appName, false, udid, null, timeout);
     if(isInstalled && !reinstall) {
         println "Error: The application ${appName} is already installed."
         System.exit(-1);
     }
-    def result = Util.installDeviceApp(app, targetID, null, timeout);
+    def result = Util.installDeviceApp(app, udid, null, timeout);
     if(result != 0) {
         println "Error: An error code of " + result + " occurred during " +
             "installation on the device."
         System.exit(-1);
     }
 } else {
-    println "Error: Unsupported device target type."
-    System.exit(-1);
+    // Determine if the simulator was running initially.
+    // TODO: Should we fail if it is running? Do we log a warning? 
+    // Util.isSimulatorRunning();
+    if(!targetOS?.trim()) {
+        println "Error: No application install target was specified.";
+        System.exit(-1);
+    }
+    
+    boolean isInstalled = Util.findSimulatorApp(appName, false, targetOS);
+    if(isInstalled && !reinstall) {
+        println "Error: The application ${app} is already installed."
+        System.exit(-1);
+    }
+    Util.installSimulatorApp(app, targetOS);
 }
 
 System.exit(0);

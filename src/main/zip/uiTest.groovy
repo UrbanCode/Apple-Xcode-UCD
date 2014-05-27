@@ -17,7 +17,9 @@ final def props = apTool.getStepProperties();
 def app = props['app']
 def script = props['script']
 def outputDir = props['outputDir']?: "."
-def target = props['target']
+def udid = props['udid']
+def simType = props['simType']
+def targetOS = props['targetOS']
 def xcode = props['xcode']?: "/Applications/Xcode.app"
 def traceTemplate = props['traceTemplate']
 def xcrunPath = props['xcrunPath']
@@ -26,9 +28,23 @@ def timeout = props['timeout']
 Util.assertMacOS();
 
 def args = ["instruments"];
-if(target) {
+// Target the physical device, if one is specified.
+if(udid) {
     args << "-w";
-    args << '\"' + target + '\"';
+    args << udid.trim();
+} else {
+    // Check if only one of the simulator target properties are set.
+    if((simType && !targetOS ) || (!simType && targetOS)) {
+        println "Error: Both the Simulator Type and Target OS must be specified when " +
+            "specifying the simulator target to UI test against.";
+        System.exit(-1);
+    }
+    if(simType && targetOS) {
+        // Build up the String for the target.
+        args << "-w";
+        args << simType.trim() + " - Simulator - iOS " + targetOS.trim();
+    }
+    // Otherwise, the default Simulator is used.
 }
 
 def xcodeApp = Util.verifyXcodePath(xcode);

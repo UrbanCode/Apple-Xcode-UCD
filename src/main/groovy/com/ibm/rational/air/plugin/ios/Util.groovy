@@ -41,10 +41,13 @@ public class Util {
     
     /**
     * Starts the simulator.
+    * simType: The simulator configuration type to start.
+    * targetOS: The OS of the simulator to start.
+    * xcode: The path to Xcode used for starting the simulator.
     **/
-    public static void startSimulator(def deviceType, def targetOS, def xcode) {
+    public static void startSimulator(def simType, def targetOS, def xcode) {
         // Update the device type and target SDK OS before launching the simulator.
-        if(deviceType?.trim() && targetOS?.trim()) {
+        if(simType?.trim() && targetOS?.trim()) {
             def xcodeApp = Util.verifyXcodePath(xcode);
             
             try {
@@ -71,7 +74,7 @@ public class Util {
             
             // Run the script to change the simulator configuration.
             def simCH = new CommandHelper(new File('.'));
-            def simArgs = ['osascript', scriptLoc, deviceType, xcodeApp.canonicalPath];
+            def simArgs = ['osascript', scriptLoc, simType, xcodeApp.canonicalPath];
             
             simCH.runCommand("Updating the simulator configuration.", simArgs);
             
@@ -80,10 +83,10 @@ public class Util {
             simArgs = ['defaults', 'read', plistLoc];
             simCH.runCommand("Refreshing the simulator configuration.", simArgs);
              
-            println "The simulator will launch an ${deviceType} using SDK ${targetOS}.";
+            println "The simulator will launch an ${simType} using SDK ${targetOS}.";
         } else {
-            if((deviceType && !targetOS ) || (!deviceType && targetOS)) {
-                println "Error: Both the Device Type and Target OS must be specified when changing " +
+            if((simType && !targetOS ) || (!simType && targetOS)) {
+                println "Error: Both the Simulator Type and Target OS must be specified when changing " +
                     "the simulator configuration.";
                 System.exit(-1);
             }
@@ -198,6 +201,7 @@ public class Util {
         def result = ch.runCommand(message, args) {
             proc ->
             def builder = new StringBuilder()
+            def startTime = System.currentTimeMillis();
             if(timeout) {
                 // forward stdout and stderr for processing
                 proc.consumeProcessOutput(builder, builder)
@@ -212,6 +216,19 @@ public class Util {
             println log;
             // Find out the output location
             log = log.find("Output : .*\\.trace");
+            if(timeout) {
+                long maxTime = Long.parseLong(timeout);
+                while(log == null && (System.currentTimeMillis() - startTime < maxTime)) {
+                    log = builder.toString();
+                    println log;
+                    log = log.find("Output : .*\\.trace");
+                }
+                if(log == null) {
+                    println "Error: The output log location is unknown. This could be " +
+                        "because a timeout has exceeded.";
+                    System.exit(-1);
+                }
+            }
             def logLocation = log.split(':');
             if(logLocation.length != 2) {
                 println "Error: An error occurred trying to find the trace output " +

@@ -18,7 +18,7 @@ import com.ibm.rational.air.plugin.ios.Util;
 def apTool = new AirPluginTool(this.args[0], this.args[1]);
 final def props = apTool.getStepProperties();
 
-def deviceType = props['deviceType']?: ""
+def simType = props['simType']?: ""
 def targetOS = props['targetOS']?: ""
 def xcode = props['xcode']?: "/Applications/Xcode.app"
 
@@ -29,7 +29,7 @@ if(Util.isSimulatorRunning()) {
     System.exit(-1);
 }
 
-Util.startSimulator(deviceType, targetOS, xcode);
+Util.startSimulator(simType, targetOS, xcode);
 
 if(!Util.isSimulatorRunning()) {
     println "The simulator failed to start.";

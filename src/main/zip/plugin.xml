@@ -31,26 +31,21 @@
                      description="The iOS application (.app or .ipa) to install."
                      default-value="${p:component/application}"/>
       </property>
-      <property name="target">
-        <property-ui type="selectBox"
-                     label="Install Into"
-                     description="Install the application into a simulator or physical 
-                        device. The specific target is specified using the 
-                        &quot;ID&quot; property."
-                     default-value="sim"/>
-        <value label="Device">dev</value>
-        <value label="Simulator">sim</value>
-      </property>
-      <property name="id" required="true">
+      <property name="udid">
         <property-ui type="textBox"
-                     label="ID"
-                     description="The ID of the device or simulator to use.
-                        The &quot;Install into&quot; property must be set to 
-                        the corresponding target. When you use the &quot;Simulator&quot; 
-                        option in the &quot;Install into&quot; property, specify the 
-                        complete target information. When you use the &quot;Device&quot;
-                        option in the &quot;Install into&quot; property, specify the 
-                        unique device identifier (UDID)."/>
+                     label="Device Identifier"
+                     description="The unique device identifier to target install on a 
+                        physical device. Note: If the device identifier is specified, 
+                        the Target OS will not be used."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS or SDK version, for example, 6.1 or 7.1-64.
+                        Note: This can be used with the simulatorOS resource property, for 
+                        example, ${p:resource/simulatorOS}-64."
+                     default-value="${p?:resource/simulatorOSInstall}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
@@ -115,7 +110,7 @@
     <properties>
       <property name="app" required="true">
         <property-ui type="textBox"
-                     label="Application"
+                     label="Application Path"
                      description="The iOS application (.app or .ipa) to test."
                      default-value="${p:component/application}"/>
       </property>
@@ -130,11 +125,26 @@
                      description="The directory where the test output should be written to."
                      default-value="."/>
       </property>
-      <property name="target">
+      <property name="udid">
         <property-ui type="textBox"
-                     label="Device Target"
-                     description="The target device to run the test against, 
-                        for example, iPhone - Simulator - iOS 7.1."/>
+                     label="Device Identifier"
+                     description="The unique device identifier to target testing on a 
+                        physical device. Note: If the device identifier is specified, 
+                        the Simulator Type and Target OS will not be used."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
+      <property name="simType">
+        <property-ui type="textBox"
+                     label="Simulator Type"
+                     description="The simulator device type, for example, iPhone or 
+                        iPhone Retina (4-inch 64-bit)."
+                     default-value="${p?:resource/simulatorType}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS or SDK version, for example, 6.1 or 7.1."
+                     default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
@@ -226,15 +236,18 @@
         Starts a simulator. The step fails if a simulator is already running.
     </description>
     <properties>
-      <property name="deviceType">
+      <property name="simType">
         <property-ui type="textBox"
-                     label="Device Type"
-                     description="The simulator device type, for example, iPad or iPhone."/>
+                     label="Simulator Type"
+                     description="The simulator device type, for example, iPhone or 
+                        iPhone Retina (4-inch 64-bit)."
+                     default-value="${p?:resource/simulatorType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1."/>
+                     description="The target OS or SDK version, for example, 6.1 or 7.1."
+                     default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
