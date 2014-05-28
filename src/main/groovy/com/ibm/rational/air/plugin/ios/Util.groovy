@@ -201,7 +201,6 @@ public class Util {
         def result = ch.runCommand(message, args) {
             proc ->
             def builder = new StringBuilder()
-            def startTime = System.currentTimeMillis();
             if(timeout) {
                 // forward stdout and stderr for processing
                 proc.consumeProcessOutput(builder, builder)
@@ -216,18 +215,9 @@ public class Util {
             println log;
             // Find out the output location
             log = log.find("Output : .*\\.trace");
-            if(timeout) {
-                long maxTime = Long.parseLong(timeout);
-                while(log == null && (System.currentTimeMillis() - startTime < maxTime)) {
-                    log = builder.toString();
-                    println log;
-                    log = log.find("Output : .*\\.trace");
-                }
-                if(log == null) {
-                    println "Error: The output log location is unknown. This could be " +
-                        "because a timeout has exceeded.";
-                    System.exit(-1);
-                }
+            if(log == null) {
+                println "Error: The output location for the test could not be determined.";
+                System.exit(-1);
             }
             def logLocation = log.split(':');
             if(logLocation.length != 2) {
