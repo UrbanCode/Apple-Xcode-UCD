@@ -194,22 +194,9 @@ public class Util {
     **/
     public static int uiTest(def xcrunPath, def outputDir, def message, 
         def arguments, def timeout) {
-        
-        def args = setupXcrunCmd(xcrunPath, arguments);
-        def ch = new CommandHelper(new File('.'));
-        ch.ignoreExitValue = true;
-        def result = ch.runCommand(message, args) {
-            proc ->
-            def builder = new StringBuilder()
-            if(timeout) {
-                // forward stdout and stderr for processing
-                proc.consumeProcessOutput(builder, builder)
-                println "A timeout of " + timeout + " milliseconds is enabled.";
-                proc.waitForOrKill(Long.parseLong(timeout));
-            } else {
-                proc.waitForProcessOutput(builder, builder);
-            }
-            
+
+        int result = runXcrunCmd(message, arguments, xcrunPath,
+            timeout) { builder ->
             def log = builder.toString();
             // Output the log to the console.
             println log;
@@ -641,5 +628,97 @@ public class Util {
         def args = ['cp', '-r', appPath, simDir];
 
         ch.runCommand("Installing the app on the simulator.", args);       
+    }
+
+    /**
+    * Runs the xcrun command with the provided options.
+    * message: An optional message to output when the command is run.
+    * arguments: The arguments to run the command with.
+    * xcrunPath: An optional path to the xcrun tool.
+    * timeout: A period after which the xcrun command is stopped in
+    *    milliseconds.
+    * closure: Used with the builder StringBuilder, this allows for parsing
+    *    the command's output streams (out and err).
+    * Returns the exit code of the command.
+    **/
+    private static int runXcrunCmd(def message, def arguments, def xcrunPath,
+        def timeout, Closure closure) {
+        def args = setupXcrunCmd(xcrunPath, arguments);
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue = true;
+        def result = ch.runCommand(message, args) {
+            proc ->
+            def builder = new StringBuilder()
+            if(timeout) {
+                // forward stdout and stderr for processing
+                proc.consumeProcessOutput(builder, builder)
+                println "A timeout of " + timeout + " milliseconds is enabled.";
+                proc.waitForOrKill(Long.parseLong(timeout));
+            } else {
+                proc.waitForProcessOutput(builder, builder);
+            }
+            
+            if(closure) {
+                closure(builder);
+            }
+        }
+        return result;
+    }
+    
+    /**
+    * Runs the xcrun command with the provided optional arguments.
+    * xcrunPath: An optional path to the xcrun tool.
+    * arguments: A space-separated list or property file of arguments.
+    * message: An optional message to output when the command is run.
+    * timeout: A period after which the Android command is stopped in
+    *    milliseconds.
+    **/
+    public static int xcrunCmd(def xcrunPath, def arguments, def message, def timeout) {
+        def args = [];
+        if(arguments) {
+            args = handleArgs(arguments, args);
+        }
+        int result = runXcrunCmd(message, args, xcrunPath,
+            timeout) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+        }
+        
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            if(timeout) {
+                println "The timeout may have been exceeded."
+            }
+        }
+        return result;
+    }
+    
+    /**
+    * Handles adding the space-separated list or file of optional arguments.
+    * arguments: A space-separated list or property file of arguments.
+    * arg: The existing arguments for the command to which to append the passed
+    *     in arguments.
+    * Returns an updated list of arguments for the command.
+    **/
+    public static def handleArgs(String arguments, def args) {
+        
+        // Check if the argument is a file or arguments
+        def inFile = new File(arguments);
+		
+        if(inFile.file) {
+            arguments = inFile.getText();
+            System.out.println("Reading from: " + inFile.getCanonicalFile());
+        }
+        
+        // Add the passed in arguments to the existing args.
+        arguments.split("\n").each { arg ->
+            arg.eachLine { it ->
+                if(it?.trim()) {
+                    args << it.trim()
+                }
+            }
+        }
+        return args;
     }
 }

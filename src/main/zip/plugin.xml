@@ -229,6 +229,53 @@
     </command>
   </step-type>
   
+  <!-- Tools based steps -->
+  
+  <step-type name="xcrun">
+    <description>Runs the iOS xcrun command.</description>
+    <properties>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path To xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"/>
+      </property>
+      <property name="additionalArgs">
+        <property-ui type="textAreaBox"
+                     label="Additional Arguments"
+                     description="Allows for providing additional arguments that are not
+                        provided in the step properties for the xcrun command. The 
+                        format can be a path to a file or a newLine-separated list 
+                        of arguments. For example, /opt/test.properties or instruments or --sdk\nmacosx\n--show-sdk-path."/>
+      </property>
+      <property name="timeout">
+        <property-ui type="textBox"
+                     label="Timeout"
+                     description="A timeout (in milliseconds), after which the 
+                        xcrun process command is stopped. By default, the step does 
+                        not time out when no value is specified."
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="xcrun.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
+  
   <!-- Simulator based steps -->
 
   <step-type name="Start Simulator">
