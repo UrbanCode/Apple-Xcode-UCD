@@ -103,6 +103,59 @@
     </command>
   </step-type>
   
+  <step-type name="Remove Application">
+    <description>Removes the iOS application.</description>
+    <properties>
+      <property name="bundleID" required="true">
+        <property-ui type="textBox"
+                     label="Application Bundle ID"
+                     description="The bundle ID of the application to remove, for 
+                     example, com.example.appName."
+                     default-value="${p:component/bundleID}"/>
+      </property>
+      <property name="udid">
+        <property-ui type="textBox"
+                     label="Device Identifier"
+                     description="The unique device identifier to target install on a 
+                        physical device. Note: If the device identifier is specified, 
+                        the Target OS will not be used."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS or SDK version, for example, 6.1 or 7.1-64.
+                        Note: This can be used with the simulatorOS resource property, for 
+                        example, ${p:resource/simulatorOS}-64."
+                     default-value="${p?:resource/simulatorOSInstall}"/>
+      </property>
+      <property name="timeout">
+        <property-ui type="textBox"
+                     label="Timeout"
+                     description="A timeout (in milliseconds), after which the 
+                        device install attempt is stopped. By default, the step uses a
+                        time out of 5 minutes.(For removing application from device only)"
+                     default-value="300000"
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Error"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="uninstallApp.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
+  
   <!-- Test based steps -->
   
   <step-type name="UI Test">

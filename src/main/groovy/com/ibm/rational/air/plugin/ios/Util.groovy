@@ -431,6 +431,43 @@ public class Util {
     }
     
     /**
+    * Runs the command for removing an application from a simulator.
+    * bundleID: The bundle ID of the application to remove.
+    * target: The OS platform target where the application is installed (e.g. 7.0).
+    * Returns the status of the removal command.
+    **/
+    public static void removeSimulatorApp(def bundleID, def target) {
+        def appFound = false;
+        def simDir = getSimulatorPath(target);
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        simDir.eachDir { uuidDir ->
+            uuidDir.eachDir { appDir ->
+                appDir.eachFile { infoFile ->
+                    if (infoFile.name == "Info.plist") {
+                        def infoPath = appDir.canonicalPath + File.separator + 'info';
+                        def args = ['defaults', 'read', infoPath, 'CFBundleIdentifier'];
+                        ch.runCommand("read app bundle ID", args){ proc ->
+                            InputStream inStream =  proc.getInputStream();
+                            inStream.eachLine { line ->
+                                if (line == bundleID){
+                                    appFound = true;
+                                    println "Uninstalling the app from the simulator. ";
+                                    uuidDir.deleteDir();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!appFound){
+            println "Error: The application with bundle ID ${bundleID} is not installed.";
+            System.exit(-1);
+        }
+    }
+    
+    /**
     * Runs the mobiledevice command with the provided options. 
     * message: An optional message to output when the command is run.
     * arguments: The arguments to run the command with.
