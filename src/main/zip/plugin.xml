@@ -35,7 +35,7 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier to target install on a 
-                        physical device. Note: If the device identifier is specified, 
+                        physical device. Note: If the Device Identifier is specified, 
                         the Target OS will not be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
@@ -57,7 +57,8 @@
                      label="Timeout"
                      description="A timeout (in milliseconds), after which the 
                         device install attempt is stopped. By default, the step uses a
-                        time out of 5 minutes."
+                        time out of 5 minutes. Note: This property applies to devices 
+                        only."
                      default-value="300000"
                      hidden="true"/>
       </property>
@@ -134,7 +135,8 @@
                      label="Timeout"
                      description="A timeout (in milliseconds), after which the 
                         device install attempt is stopped. By default, the step uses a
-                        time out of 5 minutes.(For removing application from device only)"
+                        time out of 5 minutes. Note: This property applies to devices 
+                        only."
                      default-value="300000"
                      hidden="true"/>
       </property>
@@ -182,7 +184,7 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier to target testing on a 
-                        physical device. Note: If the device identifier is specified, 
+                        physical device. Note: If the Device Identifier is specified, 
                         the Simulator Type and Target OS will not be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
@@ -277,6 +279,101 @@
       <arg value="-cp"/>
       <arg path="classes"/>
       <arg file="uiTest.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
+  
+  <step-type name="Unit Test">
+    <description>Runs the specified unit test against the application.</description>
+    <properties>
+      <property name="project">
+        <property-ui type="textBox"
+                     label="Project Name"
+                     description="The name of the project to use when testing."/>
+      </property>
+      <property name="workspace">
+        <property-ui type="textBox"
+                     label="Workspace Name"
+                     description="The name of the workspace to use when testing.
+                        Note: If a project is specified, the workspace will not
+                        be used."/>
+      </property>
+      <property name="scheme" required="true">
+        <property-ui type="textBox"
+                     label="Scheme Name"
+                     description="The name of the scheme to use when testing."/>
+      </property>
+      <property name="destination">
+        <property-ui type="textBox"
+                     label="Destination String"
+                     description="A line separated list or file of Strings representing 
+                        the destination to test against using the xcodebuild syntax.
+                        For example, &quot;platform=iOS Simulator,name=iPhone,OS=7.1&quot;. 
+                        Note: If the Destination String is specified, the Device Identifier, 
+                        Simulator Type and Target OS will not be used."/>
+      </property>
+      <property name="udid">
+        <property-ui type="textBox"
+                     label="Device Identifier"
+                     description="The unique device identifier to target testing on a 
+                        physical device. Note: If the Device Identifier is specified, 
+                        the Simulator Type and Target OS will not be used."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
+      <property name="simType">
+        <property-ui type="textBox"
+                     label="Simulator Type"
+                     description="The simulator device type, for example, iPhone or 
+                        iPhone Retina (4-inch 64-bit)."
+                     default-value="${p?:resource/simulatorType}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS or SDK version, for example, 6.1 or 7.1.
+                        Note: If no Target OS is specified, the default value of latest 
+                        is used."
+                     default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="destinationTimeout">
+        <property-ui type="textBox"
+                     label="Destination search timeout"
+                     description="The timeout for searching for the target test 
+                        destination. The system default is used if no value is 
+                        specified (see &quot;man xcodebuild&quot; for details)."
+                     hidden="true"/>
+      </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path To xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
+                     hidden="true"/>
+      </property>
+      <property name="timeout">
+        <property-ui type="textBox"
+                     label="Timeout"
+                     description="A timeout (in milliseconds), after which the 
+                        unit test is stopped. By default, the step does 
+                        not time out when no value is specified."
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="unitTest.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
     </command>

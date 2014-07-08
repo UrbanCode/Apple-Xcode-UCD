@@ -236,6 +236,39 @@ public class Util {
     }
     
     /**
+    * Runs the xcodebuild command for unit testing with the provided 
+    * options. Uses the xcrun command to find the tool. Use 
+    * xcode-select to set the system default for developer tools.
+    * See
+    * https://developer.apple.com/library/ios/documentation/DeveloperTools/Conceptual/testing_with_xcode/A2-command_line_testing/A2-command_line_testing.html#//apple_ref/doc/uid/TP40014132-CH9-SW1
+    * https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/xcodebuild.1.html
+    * xcrunPath: An optional path to the xcrun tool.
+    * message: An optional message to output when the command is run.
+    * arguments: The arguments to run the command with.
+    * timeout: A period after which the xcrun command is stopped in
+    *    milliseconds.
+    * Returns the exit code of the command.
+    **/
+    public static int unitTest(def xcrunPath, def message, def arguments, 
+        def timeout) {
+        int result = runXcrunCmd(message, arguments, xcrunPath,
+            timeout) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+        }
+        
+        if(result != 0) {
+            println "Error: Running the unit test command failed with error " +
+                "code: ${result}"; 
+            if(timeout) {
+                println "The timeout may have been exceeded."
+            }
+        }
+        return result;
+    }
+    
+    /**
     * Configures the xcrun command for command helper including the 
     * path to xcrun and the arguments to use.
     * xcrunPath: An optional path to the xcrun command, for example, 
@@ -745,15 +778,13 @@ public class Util {
 		
         if(inFile.file) {
             arguments = inFile.getText();
-            System.out.println("Reading from: " + inFile.getCanonicalFile());
+            System.out.println("Reading arguments from: " + inFile.getCanonicalFile());
         }
         
         // Add the passed in arguments to the existing args.
-        arguments.split("\n").each { arg ->
-            arg.eachLine { it ->
-                if(it?.trim()) {
-                    args << it.trim()
-                }
+        arguments.eachLine { it ->
+            if(it?.trim()) {
+                args << it.trim()
             }
         }
         return args;
