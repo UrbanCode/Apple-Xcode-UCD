@@ -19,4 +19,4 @@ def timeout = props['timeout']
 
 Util.assertMacOS();
 
-System.exit(Util.xcrunCmd(xcrunPath, additionalArgs, "Running the xcrun command.", timeout));
+System.exit(Util.xcrunCmd("Running the xcrun command.", additionalArgs, xcrunPath, timeout));

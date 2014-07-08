@@ -737,13 +737,13 @@ public class Util {
     
     /**
     * Runs the xcrun command with the provided optional arguments.
-    * xcrunPath: An optional path to the xcrun tool.
-    * arguments: A space-separated list or property file of arguments.
     * message: An optional message to output when the command is run.
+    * arguments: A space-separated list or property file of arguments.
+    * xcrunPath: An optional path to the xcrun tool.
     * timeout: A period after which the Android command is stopped in
     *    milliseconds.
     **/
-    public static int xcrunCmd(def xcrunPath, def arguments, def message, def timeout) {
+    public static int xcrunCmd(def message, def arguments, def xcrunPath, def timeout) {
         def args = [];
         if(arguments) {
             args = handleArgs(arguments, args);
