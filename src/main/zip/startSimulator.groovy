@@ -21,6 +21,7 @@ final def props = apTool.getStepProperties();
 def simType = props['simType']?: ""
 def targetOS = props['targetOS']?: ""
 def xcode = props['xcode']?: "/Applications/Xcode.app"
+int startupRetries = Integer.parseInt(props['startupRetries']?:"10")
 
 Util.assertMacOS();
 // Only one simulator can run at a time.
@@ -35,6 +36,8 @@ if(!Util.isSimulatorRunning()) {
     println "The simulator failed to start.";
     System.exit(-1);
 }
+
+Util.waitForSimulator(startupRetries);
 
 println "The simulator has started.";
 System.exit(0);

@@ -40,6 +40,59 @@ public class Util {
     }
     
     /**
+    * Checks whether a simulator started based on a maximum retry number for each
+    * 20-second interval.
+    * startupRetries: The polling frequency. That is, how many times to check every
+    *   20 seconds for the simulator status.
+    **/
+    public static void waitForSimulator(int startupRetries) {
+        def syslogPath = new File("/var/log/system.log");
+        def args = ['tail', '-F', syslogPath];
+        
+        def ch = new CommandHelper(new File('.'));
+        boolean foundSimulator = false;
+        int MAX_TRIES = startupRetries;
+        int SLEEP = 20000;
+        
+        def builder = new StringBuilder();
+        def errOut = new StringBuilder();
+        // The process is interrupted when a simulator is found.
+        // So we ignore the exit value since it will return 1.
+        ch.ignoreExitValue(true);
+        println "Waiting for the simulator to start.";
+        try {
+            ch.runCommand(null, args) {
+                proc ->
+                // store stdout and stderr for processing
+                proc.consumeProcessOutput(builder, errOut)
+                for(int i = 0; !foundSimulator && i < MAX_TRIES; i++) {
+                    def devices = builder.toString();
+                    
+                    if(devices.contains("SIMToolkit plugin for SpringBoard initialized")) {
+                        foundSimulator = true;
+                    } else {
+                        if (i != (MAX_TRIES-1))
+                            Thread.sleep(SLEEP);
+                    }
+                }
+                // End the process and report the status.
+                proc.destroy();
+            };
+        } catch (Exception e) {
+            println "An error occurred during an attempt to find a started simulator: ${e.message}";
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        
+        if(!foundSimulator) {
+            println "Error: The simulator was not found. Please check the system.";
+            System.exit(-1);
+        }
+        
+        println "The simulator UI is ready.";
+    }
+    
+    /**
     * Starts the simulator.
     * simType: The simulator configuration type to start.
     * targetOS: The OS of the simulator to start.

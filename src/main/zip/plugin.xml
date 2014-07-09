@@ -453,6 +453,14 @@
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
+      <property name="startupRetries" required="true">
+        <property-ui type="textBox"
+                     label="Startup Polling Maximum Retries"
+                     description="The maximum number of times to attempt polling for
+                        simulator startup every 20 seconds. The default value is 10."
+                     default-value="10"
+                     hidden="true"/>
+      </property>
     </properties>
     <post-processing><![CDATA[
         if (properties.get("exitCode") != 0) {
