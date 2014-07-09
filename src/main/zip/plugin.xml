@@ -41,11 +41,10 @@
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
-                     label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1-64.
-                        Note: This can be used with the simulatorOS resource property, for 
-                        example, ${p:resource/simulatorOS}-64."
-                     default-value="${p?:resource/simulatorOSInstall}"/>
+                     label="Target OS and Optional Architecture"
+                     description="The target OS or SDK version and optional 64-bit 
+                        architecture, for example, 6.1 or 7.1-64."
+                     default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
@@ -124,11 +123,10 @@
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
-                     label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1-64.
-                        Note: This can be used with the simulatorOS resource property, for 
-                        example, ${p:resource/simulatorOS}-64."
-                     default-value="${p?:resource/simulatorOSInstall}"/>
+                     label="Target OS and Optional Architecture"
+                     description="The target OS or SDK version and optional 64-bit 
+                        architecture, for example, 6.1 or 7.1-64."
+                     default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
@@ -204,9 +202,9 @@
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation. If the 
-                        value is not specified, a default value of 
-                        /Applications/Xcode.app is used."
+                     description="The path to the Xcode installation for locating the
+                        Trace Template. If the value is not specified, a default value 
+                        of /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
@@ -449,8 +447,8 @@
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation. If the 
-                        value is not specified, a default value of 
+                     description="The path to the Xcode installation for locating the SDK. 
+                        If the value is not specified, a default value of 
                         /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>

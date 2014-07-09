@@ -480,7 +480,7 @@ public class Util {
                     if (infoFile.name == "Info.plist") {
                         def infoPath = appDir.canonicalPath + File.separator + 'info';
                         def args = ['defaults', 'read', infoPath, 'CFBundleIdentifier'];
-                        ch.runCommand("read app bundle ID", args){ proc ->
+                        ch.runCommand("read app bundle ID", args) { proc ->
                             InputStream inStream =  proc.getInputStream();
                             inStream.eachLine { line ->
                                 if (line == bundleID){
@@ -697,7 +697,13 @@ public class Util {
         def ch = new CommandHelper(new File('.'));
         def args = ['cp', '-r', appPath, simDir];
 
-        ch.runCommand("Installing the app on the simulator.", args);       
+        def result = ch.runCommand("Installing the app on the simulator.", args);
+        if(result != 0) {
+            println "Error: Running the copy command to install the application into " +
+                "the simulator failed with this error code: ${result}.";
+            println "Removing the attempted install.";
+            simDir.deleteDir();
+        }
     }
 
     /**
