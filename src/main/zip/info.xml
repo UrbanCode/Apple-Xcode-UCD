@@ -27,7 +27,7 @@
   </licenses>
   -->
   
-  <tool-description>The iOS plug-in provides functionality for interacting with iOS simulators and devices.</tool-description>
+  <tool-description>The Apple Xcode plug-in provides functionality for interacting with iOS simulators and devices.</tool-description>
   
   <!-- Do not change the release-version, the build process injects it. -->
   <release-version>#RELEASE_VERSION#</release-version>  

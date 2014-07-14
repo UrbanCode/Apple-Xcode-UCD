@@ -29,9 +29,6 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    // Determine if the simulator was running initially.
-    // TODO: Should we fail if it is running? Do we log a warning?
-    // Util.isSimulatorRunning();
     if(!targetOS?.trim()) {
         println "Error: No application removal target was specified.";
         System.exit(-1);

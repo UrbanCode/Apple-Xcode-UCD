@@ -40,15 +40,69 @@ public class Util {
     }
     
     /**
-    * Checks whether a simulator started based on a maximum retry number for each
-    * 20-second interval.
-    * startupRetries: The polling frequency. That is, how many times to check every
-    *   20 seconds for the simulator status.
+    * Get the target OS version 
+    * targetOS: The OS of the simulator to find version.
+    * xcode: The path to Xcode used for finding the simulator.
     **/
-    public static void waitForSimulator(int startupRetries) {
-        def syslogPath = new File("/var/log/system.log");
-        def args = ['tail', '-F', syslogPath];
+    private static String getTargetOSVersion(def targetOS, def xcode) {
+        if(targetOS.contains("-64")){
+             targetOS = targetOS.substring(0, targetOS.indexOf("-64"));
+        }
+        def xcodeApp = Util.verifyXcodePath(xcode);
+        try {
+            def pathToVersion = new String(File.separator + "Contents" + File.separator +
+                "Developer" + File.separator + "Platforms" + File.separator +
+                "iPhoneSimulator.platform" + File.separator + "Developer" + File.separator +
+                "SDKs" + File.separator + "iPhoneSimulator" + targetOS + ".sdk" + File.separator +
+                "System" + File.separator + "Library" + File.separator + "CoreServices" +
+                File.separator +"SystemVersion.plist");
+            xcodeApp = new File(xcodeApp, pathToVersion);
+        } catch (Exception e) {
+            println "An error occurred during an attempt to access the SystemVersion.plist file of target OS " +
+                targetOS;
+            println  "Exception message:" + e.getMessage();
+            System.exit(-1);
+        }
         
+        def targetOSWithVersion = xcodeApp.getText();
+        if(targetOSWithVersion == null || targetOSWithVersion.trim().length() == 0) {
+            println "Error: the SystemVersion.plist file is empty.";
+            System.exit(-1);
+        }
+        
+        targetOSWithVersion = targetOSWithVersion.find(/ProductVersion.*\n.*/);
+        targetOSWithVersion = targetOSWithVersion.find(/(\d+\.)+\d+/);
+        println "The target OS version is " + targetOSWithVersion;
+        return targetOSWithVersion;
+    }
+    
+    /**
+    * Checks whether a simulator started based on a maximum retry number for each
+    *    20-second interval.
+    * startupRetries: The polling frequency. That is, how many times to check every
+    *    20 seconds for the simulator status.
+    * simType: The simulator configuration type to check.
+    * targetOS: The OS of the simulator to check.
+    * xcode: The path to Xcode used for checking the simulator.
+    **/
+    public static void waitForSimulator(int startupRetries, def simType, def targetOS, def xcode) {
+        def targetOSWithVersion = getTargetOSVersion(targetOS, xcode);
+        
+        def type64 = "";
+        if (targetOS.contains("-64"))
+            type64 = "-64";
+        def syslogPath;
+        try {
+            syslogPath = new File(System.getProperty("user.home") + File.separator + "Library" +
+                File.separator + "Logs" + File.separator + "iOS Simulator" +
+                File.separator + targetOSWithVersion + type64 + File.separator + "system.log");
+        } catch (Exception e) {
+            println "An error occurred during an attempt to access the simulator log file: " +
+                e.getMessage();
+            System.exit(-1);
+        }
+        
+        def args = ['tail', '-n', '-0', '-F', syslogPath];
         def ch = new CommandHelper(new File('.'));
         boolean foundSimulator = false;
         int MAX_TRIES = startupRetries;
@@ -67,8 +121,7 @@ public class Util {
                 proc.consumeProcessOutput(builder, errOut)
                 for(int i = 0; !foundSimulator && i < MAX_TRIES; i++) {
                     def devices = builder.toString();
-                    
-                    if(devices.contains("SIMToolkit plugin for SpringBoard initialized")) {
+                    if(devices.contains("SIMToolkit plugin for SpringBoard initialized")){
                         foundSimulator = true;
                     } else {
                         if (i != (MAX_TRIES-1))
@@ -525,6 +578,11 @@ public class Util {
     public static void removeSimulatorApp(def bundleID, def target) {
         def appFound = false;
         def simDir = getSimulatorPath(target);
+        if(!simDir.isDirectory()) {
+            println "Error: The path to the simulator is incorrect: " +
+                simDir.canonicalPath;
+            System.exit(-1);
+        }
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
         simDir.eachDir { uuidDir ->
@@ -630,6 +688,10 @@ public class Util {
     **/
     public static boolean findSimulatorApp(def appName, def isPkg, def target) {
         def simDir = getSimulatorPath(target);
+        if(!simDir.isDirectory()) {
+            println "The path to the simulator was not found.";
+            return false;
+        }
         def appFound = false;
         simDir.eachDir { uuidDir ->
             uuidDir.eachDir { appDir ->
@@ -663,25 +725,76 @@ public class Util {
                 e.getMessage();
             System.exit(-1);
         }
-        if(!simDir.isDirectory()) {
-            // The simulator directory doesn't exist, we can start/stop the simulator to
-            // create the directory.
-            // TODO: Start/stop the simulator?
-            println "Error: The path to the simulator is incorrect: " + 
-                simDir.canonicalPath;
+        if(simDir == null){
+            println "Error: the simulator directory was not found."
             System.exit(-1);
         }
         return simDir;
     }
     
     /**
+    * Create a simulator directory for a given target OS:
+    * target: The OS platform target to install the application into (e.g. 7.0).
+    * xcode: The path to Xcode used for starting the simulator.
+    **/
+    private static void createSimulatorDir(def target, def xcode){
+        println "Creating a simulator directory for target OS: " + target;
+        //Starting simulator;
+        def targetString = new String(target);
+        def simulatorType;
+        
+        if(targetString.contains("-64")) {
+            simulatorType = "iPhone Retina (4-inch 64-bit)";
+            targetString = targetString.substring(0, targetString.indexOf("-64")); //remove string "-64"
+        } else {
+            simulatorType = "iPhone Retina (4-inch)";
+        }
+        //os target only support format int.int
+        targetString = targetString.find(/\d+\.\d+/);
+        if(targetString == null){
+            println "The target OS is not valid.";
+            System.exit(-1);
+        }
+        startSimulator(simulatorType, targetString, xcode);
+        if(!Util.isSimulatorRunning()) {
+            println "The simulator failed to start.";
+            System.exit(-1);
+        }
+        waitForSimulator(10, simulatorType, target, xcode);
+        
+        //Stopping simulator;
+        if(!isSimulatorRunning()) {
+            println "No simulator was running.";
+            System.exit(-1);
+        }
+        Util.stopSimulator();
+        if(Util.isSimulatorRunning()) {
+            println "The simulator failed to stop during simulator creation "+
+                    "of the target OS ${target}.";
+            System.exit(-1);
+        }
+        println "The simulator has stopped.";
+        
+        println "The simulator directory is created";
+    }
+    
+    /**
     * Installs the supplied application on the target simulator. 
     * app: The path to the application (.ipa or .app) to install.
     * target: The OS platform target to install the application into (e.g. 7.0).
+    * xcode: The path to Xcode used for starting the simulator.
     * Returns the status of the install command.
     **/
-    public static void installSimulatorApp(def app, def target) {
-        def simDir = getSimulatorPath(target);
+    public static void installSimulatorApp(def app, def target, def xcode) {
+        def targetOSWithVersion = getTargetOSVersion(target, xcode);
+        if (target.contains("-64")){
+            targetOSWithVersion += "-64";
+        }
+        def simDir = getSimulatorPath(targetOSWithVersion);
+        if(!simDir.isDirectory()) {
+            //If the simulator directory doesn't exist, we try to create the directory.
+            createSimulatorDir(target, xcode);
+        }
         println "Installing into simulator: " + simDir.canonicalPath;
         
         // Generate a UUID as the application installation directory.

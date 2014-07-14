@@ -17,6 +17,7 @@ def app = props['app']
 def udid = props['udid']
 def targetOS = props['targetOS']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
+def xcode = props['xcode']?: "/Applications/Xcode.app"
 def timeout = props['timeout']?: "300000"
 
 Util.assertMacOS();
@@ -46,9 +47,6 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    // Determine if the simulator was running initially.
-    // TODO: Should we fail if it is running? Do we log a warning? 
-    // Util.isSimulatorRunning();
     if(!targetOS?.trim()) {
         println "Error: No application install target was specified.";
         System.exit(-1);
@@ -59,7 +57,7 @@ if (udid) {
         println "Error: The application ${app} is already installed."
         System.exit(-1);
     }
-    Util.installSimulatorApp(app, targetOS);
+    Util.installSimulatorApp(app, targetOS, xcode);
 }
 
 System.exit(0);

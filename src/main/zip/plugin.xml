@@ -11,12 +11,11 @@
         xmlns:server="http://www.urbancode.com/PluginServerXMLSchema_v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <header>
-    <identifier id="com.ibm.rational.iOS" name="iOS" version="1"/>
+    <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="1"/>
     <description>
-        Provides mobile support for working with iOS.
-        Refer to the ios_plugin.pdf file, which is embedded in the plug-in .zip file for more documentation.
+        Provides mobile support for working with Apple Xcode.
     </description>
-    <tag>Mobile/iOS</tag>
+    <tag>Mobile/Apple Xcode</tag>
     <server:required-server-version>6.0.1.0</server:required-server-version>
   </header>
   
@@ -50,6 +49,17 @@
         <property-ui type="checkBox"
                      label="Reinstall"
                      description="Reinstall the app."/>
+      </property>
+      <property name="xcode">
+        <property-ui type="textBox"
+                     label="Path To Xcode"
+                     description="The path to the Xcode installation for locating the SDK. 
+                        If the value is not specified, a default value of 
+                        /Applications/Xcode.app is used. Xcode will be used to create the 
+                        targetOS directory if the targetOS directory provided by the user does 
+                        not exist."
+                     default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
@@ -303,7 +313,7 @@
                      description="The name of the scheme to use when testing."/>
       </property>
       <property name="destination">
-        <property-ui type="textBox"
+        <property-ui type="textAreaBox"
                      label="Destination String"
                      description="A line separated list or file of Strings representing 
                         the destination to test against using the xcodebuild syntax.
@@ -396,7 +406,7 @@
                      description="Allows for providing additional arguments that are not
                         provided in the step properties for the xcrun command. The 
                         format can be a path to a file or a newLine-separated list 
-                        of arguments. For example, /opt/test.properties or instruments or --sdk\nmacosx\n--show-sdk-path."/>
+                        of arguments. For example, /opt/test.properties or --show-sdk-path."/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
