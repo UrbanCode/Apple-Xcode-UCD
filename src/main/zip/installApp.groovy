@@ -15,7 +15,7 @@ final def props = apTool.getStepProperties();
 
 def app = props['app']
 def udid = props['udid']
-def targetOS = props['targetOS']
+def target = props['target']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
 def xcode = props['xcode']?: "/Applications/Xcode.app"
 def timeout = props['timeout']?: "300000"
@@ -47,17 +47,17 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if(!targetOS?.trim()) {
+    if(!target?.trim()) {
         println "Error: No application install target was specified.";
         System.exit(-1);
     }
     
-    boolean isInstalled = Util.findSimulatorApp(appName, false, targetOS);
+    boolean isInstalled = Util.findSimulatorApp(appName, false, target, xcode);
     if(isInstalled && !reinstall) {
         println "Error: The application ${app} is already installed."
         System.exit(-1);
     }
-    Util.installSimulatorApp(app, targetOS, xcode);
+    Util.installSimulatorApp(app, target, xcode);
 }
 
 System.exit(0);

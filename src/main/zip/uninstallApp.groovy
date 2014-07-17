@@ -15,7 +15,8 @@ final def props = apTool.getStepProperties();
 
 def bundleID = props['bundleID']
 def udid = props['udid']
-def targetOS = props['targetOS']
+def target = props['target']
+def xcode = props['xcode']?: "/Applications/Xcode.app"
 def timeout = props['timeout']?: "300000"
 
 Util.assertMacOS();
@@ -29,11 +30,11 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if(!targetOS?.trim()) {
+    if(!target?.trim()) {
         println "Error: No application removal target was specified.";
         System.exit(-1);
     }
-    Util.removeSimulatorApp(bundleID, targetOS);
+    Util.removeSimulatorApp(bundleID, target, xcode);
 }
 
 System.exit(0);

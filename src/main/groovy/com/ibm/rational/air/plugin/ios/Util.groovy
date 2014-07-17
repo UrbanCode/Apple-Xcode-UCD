@@ -7,6 +7,7 @@
 * IBM Corp.
 **/
 
+
 package com.ibm.rational.air.plugin.ios;
 
 import com.urbancode.air.CommandHelper;
@@ -15,6 +16,14 @@ import com.urbancode.air.CommandHelper;
 * A utility class for helping to run the iOS commands.
 **/
 public class Util {
+    /**
+    * Util Standard Variables' Names:
+    * target: The OS of the simulator with architecture option (e.g: 7.0-64).
+    * targetOS: The OS of the simulator without architecture option (e.g: 7.0).
+    * targetOSWithVersion: The OS of the simulator with version without architecture option (e.g: 7.0.3).
+    * simType: The simulator type (e.g: 'iPhone Retina (4-inch 64-bit)', 'iPhone Retina (4-inch)').
+    ** /
+
     /**
     * Checks if the plug-in is running on Mac OS.
     **/
@@ -41,13 +50,11 @@ public class Util {
     
     /**
     * Get the target OS version 
-    * targetOS: The OS of the simulator to find version.
+    * targetOS: The OS of the simulator to find the target OS with version
+    *   (without architecture option e.g 7.0).
     * xcode: The path to Xcode used for finding the simulator.
     **/
     private static String getTargetOSVersion(def targetOS, def xcode) {
-        if(targetOS.contains("-64")){
-             targetOS = targetOS.substring(0, targetOS.indexOf("-64"));
-        }
         def xcodeApp = Util.verifyXcodePath(xcode);
         try {
             def pathToVersion = new String(File.separator + "Contents" + File.separator +
@@ -78,35 +85,50 @@ public class Util {
     
     /**
     * Checks whether a simulator started based on a maximum retry number for each
-    *    20-second interval.
+    *    10-second interval.
     * startupRetries: The polling frequency. That is, how many times to check every
-    *    20 seconds for the simulator status.
+    *    10 seconds for the simulator status.
     * simType: The simulator configuration type to check.
-    * targetOS: The OS of the simulator to check.
+    * targetOS: The OS of the simulator to check (without architecture option e.g 7.0).
     * xcode: The path to Xcode used for checking the simulator.
     **/
     public static void waitForSimulator(int startupRetries, def simType, def targetOS, def xcode) {
         def targetOSWithVersion = getTargetOSVersion(targetOS, xcode);
         
-        def type64 = "";
-        if (targetOS.contains("-64"))
-            type64 = "-64";
+        def archLevel = "";
+        if (simType.contains("64-bit"))
+            archLevel = "-64";
         def syslogPath;
         try {
             syslogPath = new File(System.getProperty("user.home") + File.separator + "Library" +
                 File.separator + "Logs" + File.separator + "iOS Simulator" +
-                File.separator + targetOSWithVersion + type64 + File.separator + "system.log");
+                File.separator + targetOSWithVersion + archLevel + File.separator + "system.log");
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator log file: " +
                 e.getMessage();
             System.exit(-1);
         }
         
+        //If the iOS Simulator system.log file is not found (e.g any OS level lower than 7.0),
+        //check the system level log file.
+        if (!syslogPath.file){
+            println "Not able to find the iOS Simulator log file: " + 
+                    syslogPath.canonicalPath;
+            println "Checking the system level log file."
+            syslogPath = new File("/var/log/system.log");
+            
+            if (!syslogPath.file){
+                println "Error: The path to the system level log file is incorrect: " +
+                        syslogPath.canonicalPath;
+                    System.exit(-1);
+            }
+        }
+        
         def args = ['tail', '-n', '-0', '-F', syslogPath];
         def ch = new CommandHelper(new File('.'));
         boolean foundSimulator = false;
         int MAX_TRIES = startupRetries;
-        int SLEEP = 20000;
+        int SLEEP = 10000;
         
         def builder = new StringBuilder();
         def errOut = new StringBuilder();
@@ -148,7 +170,7 @@ public class Util {
     /**
     * Starts the simulator.
     * simType: The simulator configuration type to start.
-    * targetOS: The OS of the simulator to start.
+    * targetOS: The OS of the simulator to start (without architecture option e.g 7.0).
     * xcode: The path to Xcode used for starting the simulator.
     **/
     public static void startSimulator(def simType, def targetOS, def xcode) {
@@ -572,12 +594,13 @@ public class Util {
     /**
     * Runs the command for removing an application from a simulator.
     * bundleID: The bundle ID of the application to remove.
-    * target: The OS platform target where the application is installed (e.g. 7.0).
+    * target: The OS platform target where the application is installed (with architecture option e.g 7.0-64).
+    * xcode: The path to Xcode used for starting the simulator.
     * Returns the status of the removal command.
     **/
-    public static void removeSimulatorApp(def bundleID, def target) {
+    public static void removeSimulatorApp(def bundleID, def target, def xcode) { 
         def appFound = false;
-        def simDir = getSimulatorPath(target);
+        def simDir = getSimulatorPath(target, xcode);
         if(!simDir.isDirectory()) {
             println "Error: The path to the simulator is incorrect: " +
                 simDir.canonicalPath;
@@ -683,11 +706,12 @@ public class Util {
     * Determines if the supplied application is installed on the simulator. 
     * app: The name (.app) or package of the application (.ipa or .app) to find.
     * isPkg: Boolean whether the supplied app is being searched by package. Not currently supported.
-    * target: The simulator target to check for the installed application.
+    * target: The OS simulator target to check for the installed application (with architecture option e.g: 7.0-64).
+    * xcode: The path to Xcode used for finding the simulator application.
     * Returns whether the application was found.
     **/
-    public static boolean findSimulatorApp(def appName, def isPkg, def target) {
-        def simDir = getSimulatorPath(target);
+    public static boolean findSimulatorApp(def appName, def isPkg, def target, def xcode) {
+        def simDir = getSimulatorPath(target, xcode);
         if(!simDir.isDirectory()) {
             println "The path to the simulator was not found.";
             return false;
@@ -705,21 +729,31 @@ public class Util {
     
     /**
     * Finds the path to the target simulator installation.
-    * target: The OS platform target to install the application into (e.g. 7.0).
+    * target: The OS platform target to install the application into (with architecture option e.g: 7.0-64).
+    * xcode: The path to Xcode used for getting the simulator path.
     * Returns the File path to the target simulator installation.
     **/
-    private static File getSimulatorPath(def target) {
+    private static File getSimulatorPath(def target, def xcode) {
         if(!target?.trim()) {
             println "Error: A target OS must be specified.";
             System.exit(-1);
         }
+        
+        def archLevel = ""; // architecture level can be -64 or an empty string
+        def targetOS = target; // the OS platform target without the architecture option
+        if(target.contains("-64")){
+            archLevel = "-64";
+            targetOS = target.substring(0, target.indexOf("-64"));
+        }
+        def targetOSWithVersion = getTargetOSVersion(targetOS, xcode); //e.g return 7.0.3
+        targetOSWithVersion += archLevel; //e.g return 7.0.3-64
         
         // Build up the directory to the install and verify the directories exist.
         def simDir;
         try {
             simDir = new File(System.getProperty("user.home") + File.separator + "Library" +
                 File.separator + "Application Support" + File.separator + "iPhone Simulator" +
-                File.separator + target + File.separator + "Applications");
+                File.separator + targetOSWithVersion + File.separator + "Applications");
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator: " +
                 e.getMessage();
@@ -734,33 +768,30 @@ public class Util {
     
     /**
     * Create a simulator directory for a given target OS:
-    * target: The OS platform target to install the application into (e.g. 7.0).
+    * targetOS: The OS platform target to install the application into (without architecture option e.g: 7.0).
     * xcode: The path to Xcode used for starting the simulator.
+    * is64Bit: the architecture option
     **/
-    private static void createSimulatorDir(def target, def xcode){
-        println "Creating a simulator directory for target OS: " + target;
+    private static void createSimulatorDir(def targetOS, def xcode, boolean is64Bit){
+        println "Creating a simulator directory for target OS: " + targetOS;
         //Starting simulator;
-        def targetString = new String(target);
         def simulatorType;
-        
-        if(targetString.contains("-64")) {
+        if(is64Bit) {
             simulatorType = "iPhone Retina (4-inch 64-bit)";
-            targetString = targetString.substring(0, targetString.indexOf("-64")); //remove string "-64"
         } else {
             simulatorType = "iPhone Retina (4-inch)";
         }
-        //os target only support format int.int
-        targetString = targetString.find(/\d+\.\d+/);
-        if(targetString == null){
-            println "The target OS is not valid.";
+        // Only one simulator can run at a time.
+        if(isSimulatorRunning()) {
+            println "A simulator is already running.";
             System.exit(-1);
         }
-        startSimulator(simulatorType, targetString, xcode);
+        startSimulator(simulatorType, targetOS, xcode);
         if(!Util.isSimulatorRunning()) {
             println "The simulator failed to start.";
             System.exit(-1);
         }
-        waitForSimulator(10, simulatorType, target, xcode);
+        waitForSimulator(10, simulatorType, targetOS, xcode);
         
         //Stopping simulator;
         if(!isSimulatorRunning()) {
@@ -770,7 +801,7 @@ public class Util {
         Util.stopSimulator();
         if(Util.isSimulatorRunning()) {
             println "The simulator failed to stop during simulator creation "+
-                    "of the target OS ${target}.";
+                    "of the target OS ${targetOS}.";
             System.exit(-1);
         }
         println "The simulator has stopped.";
@@ -781,19 +812,21 @@ public class Util {
     /**
     * Installs the supplied application on the target simulator. 
     * app: The path to the application (.ipa or .app) to install.
-    * target: The OS platform target to install the application into (e.g. 7.0).
+    * target: The OS platform target to install the application into (with architecture option e.g. 7.0-64).
     * xcode: The path to Xcode used for starting the simulator.
     * Returns the status of the install command.
     **/
     public static void installSimulatorApp(def app, def target, def xcode) {
-        def targetOSWithVersion = getTargetOSVersion(target, xcode);
-        if (target.contains("-64")){
-            targetOSWithVersion += "-64";
+        boolean is64Bit = false;
+        def targetOS = target; // the OS platform target without the architecture option
+        if(target.contains("-64")){
+            targetOS = target.substring(0, target.indexOf("-64"));
+            is64Bit = true;
         }
-        def simDir = getSimulatorPath(targetOSWithVersion);
+        def simDir = getSimulatorPath(target, xcode);
         if(!simDir.isDirectory()) {
             //If the simulator directory doesn't exist, we try to create the directory.
-            createSimulatorDir(target, xcode);
+            createSimulatorDir(targetOS, xcode, is64Bit);
         }
         println "Installing into simulator: " + simDir.canonicalPath;
         
@@ -947,7 +980,7 @@ public class Util {
         
         // Check if the argument is a file or arguments
         def inFile = new File(arguments);
-		
+        
         if(inFile.file) {
             arguments = inFile.getText();
             System.out.println("Reading arguments from: " + inFile.getCanonicalFile());

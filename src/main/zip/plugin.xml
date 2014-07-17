@@ -38,7 +38,7 @@
                         the Target OS will not be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="targetOS">
+      <property name="target">
         <property-ui type="textBox"
                      label="Target OS and Optional Architecture"
                      description="The target OS or SDK version and optional 64-bit 
@@ -131,12 +131,21 @@
                         the Target OS will not be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="targetOS">
+      <property name="target">
         <property-ui type="textBox"
                      label="Target OS and Optional Architecture"
                      description="The target OS or SDK version and optional 64-bit 
                         architecture, for example, 6.1 or 7.1-64."
                      default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
+      </property>
+      <property name="xcode">
+        <property-ui type="textBox"
+                     label="Path To Xcode"
+                     description="The path to the Xcode installation for locating the SDK. 
+                        If the value is not specified, a default value of 
+                        /Applications/Xcode.app is used."
+                     default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
@@ -467,7 +476,7 @@
         <property-ui type="textBox"
                      label="Startup Polling Maximum Retries"
                      description="The maximum number of times to attempt polling for
-                        simulator startup every 20 seconds. The default value is 10."
+                        simulator startup every 10 seconds. The default value is 10."
                      default-value="10"
                      hidden="true"/>
       </property>
