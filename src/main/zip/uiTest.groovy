@@ -76,6 +76,20 @@ args << traceTemplatePath.canonicalPath;
 
 args << Util.handleApplication(app);
 
+def scriptFile;
+try {
+    scriptFile = new File(script);
+} catch (Exception e) {
+    println "An error occurred during an atempt to access the script " +
+        "file " + script + ": " + e.getMessage();
+    System.exit(-1);
+}
+if(!scriptFile.file) {
+    println "Error: The path to the script file is incorrect: " +
+        scriptFile.canonicalPath;
+    System.exit(-1);
+}
+
 args << "-e" << "UIASCRIPT" << script << "-v";
 
 System.exit(Util.uiTest(xcrunPath, outputDir, "Running UI tests.", args, timeout));
