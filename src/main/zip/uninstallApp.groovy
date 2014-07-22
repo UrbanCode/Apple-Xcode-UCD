@@ -37,4 +37,5 @@ if (udid) {
     Util.removeSimulatorApp(bundleID, target, xcode);
 }
 
+println "The Remove Application step completed.";
 System.exit(0);

@@ -60,4 +60,5 @@ if (udid) {
     Util.installSimulatorApp(app, target, xcode);
 }
 
+println "The Install Application step completed.";
 System.exit(0);
