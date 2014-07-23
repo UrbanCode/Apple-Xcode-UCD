@@ -37,6 +37,7 @@ if(!Util.isSimulatorRunning()) {
     System.exit(-1);
 }
 
+println "Wait for the simulator to start.";
 Util.waitForSimulator(startupRetries, simType, targetOS, xcode);
 
 println "The simulator has started.";

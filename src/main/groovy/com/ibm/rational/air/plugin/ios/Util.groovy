@@ -832,6 +832,7 @@ public class Util {
             println "Error: the simulator directory was not found."
             System.exit(-1);
         }
+        println "The simulator path is: " + simDir.canonicalPath;
         return simDir;
     }
     
@@ -860,6 +861,7 @@ public class Util {
             println "The simulator failed to start.";
             System.exit(-1);
         }
+        println "Wait for the simulator to start.";
         waitForSimulator(10, simulatorType, targetOS, xcode);
         
         //Stopping simulator;
