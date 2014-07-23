@@ -704,27 +704,80 @@ public class Util {
     
     /**
     * Determines if the supplied application is installed on the simulator. 
-    * app: The name (.app) or package of the application (.ipa or .app) to find.
-    * isPkg: Boolean whether the supplied app is being searched by package. Not currently supported.
+    * bundleID: The bundle ID of the application to find.
     * target: The OS simulator target to check for the installed application (with architecture option e.g: 7.0-64).
     * xcode: The path to Xcode used for finding the simulator application.
     * Returns whether the application was found.
     **/
-    public static boolean findSimulatorApp(def appName, def isPkg, def target, def xcode) {
+    public static boolean findSimulatorApp(def bundleID, def target, def xcode) {
         def simDir = getSimulatorPath(target, xcode);
         if(!simDir.isDirectory()) {
             println "The path to the simulator was not found.";
             return false;
         }
         def appFound = false;
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
         simDir.eachDir { uuidDir ->
             uuidDir.eachDir { appDir ->
-                if(appDir.name == appName) {
-                    appFound = true;
+                appDir.eachFile { infoFile ->
+                    if (infoFile.name == "Info.plist") {
+                        def infoPath = appDir.canonicalPath + File.separator + 'info';
+                        def args = ['defaults', 'read', infoPath, 'CFBundleIdentifier'];
+                        ch.runCommand("read app bundle ID", args) { proc ->
+                            InputStream inStream =  proc.getInputStream();
+                            inStream.eachLine { line ->
+                                if (line == bundleID){
+                                    appFound = true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         return appFound;
+    }
+    
+    /**
+    * Finds the bundle ID of an application given the path to the .app.
+    * pathToApp: The local path to the .app directory to get the bundle ID for.
+    * Returns the bundle ID from reading the Info.plist file or null if one is
+    *   is not found.
+    **/
+    public static String getAppBundleID(def pathToApp) {
+        def appDir;
+        try {
+            appDir = new File(pathToApp);
+        } catch (Exception e) {
+            println "An error occurred when attempting to get the application's " +
+                "bundle ID: " + e.getMessage();
+            System.exit(-1);
+        }
+        if(!appDir?.isDirectory()) {
+            println "The path to the application was not found.";
+            System.exit(-1);
+        }
+        def bundleID = null;
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        appDir.eachFile { infoFile ->
+            if (infoFile.name == "Info.plist") {
+                def infoPath = appDir.canonicalPath + File.separator + 'info';
+                def args = ['defaults', 'read', infoPath, 'CFBundleIdentifier'];
+                ch.runCommand("read app bundle ID", args) { proc ->
+                    InputStream inStream =  proc.getInputStream();
+                    List lines = inStream.readLines();
+                    if(lines.size == 0) {
+                        println "An error occurred finding the bundle ID.";
+                        System.exit(-1);
+                    }
+                    //The first line is the bundle ID (ignore the new line).
+                    bundleID = lines.get(0);
+                }
+            }
+        }
+        return bundleID;
     }
     
     /**

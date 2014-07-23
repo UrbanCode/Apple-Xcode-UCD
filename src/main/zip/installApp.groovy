@@ -26,18 +26,19 @@ if(!app?.trim()) {
     println "Error: An application to install must be supplied."
     System.exit(-1);
 }
-def appName;
-if(app.contains(File.separator)) {
-    appName = app.substring(app.lastIndexOf(File.separator) + 1);
-} else {
-    appName = app;
+def appFile = Util.handleApplication(app);
+def bundleID = Util.getAppBundleID(appFile);
+if(!bundleID) {
+    println "An error occurred while trying to find the application bundle ID in " + 
+        "order to determine if the application is installed.";
+    System.exit(-1);
 }
 
 // The target is a device.
 if (udid) {
-    boolean isInstalled = Util.findDeviceApp(appName, false, udid, null, timeout);
+    boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
     if(isInstalled && !reinstall) {
-        println "Error: The application ${appName} is already installed."
+        println "Error: The application ${app} is already installed."
         System.exit(-1);
     }
     def result = Util.installDeviceApp(app, udid, null, timeout);
@@ -52,7 +53,7 @@ if (udid) {
         System.exit(-1);
     }
     
-    boolean isInstalled = Util.findSimulatorApp(appName, false, target, xcode);
+    boolean isInstalled = Util.findSimulatorApp(bundleID, target, xcode);
     if(isInstalled && !reinstall) {
         println "Error: The application ${app} is already installed."
         System.exit(-1);
