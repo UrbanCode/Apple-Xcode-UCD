@@ -58,6 +58,9 @@ if (udid) {
         println "Error: The application ${app} is already installed."
         System.exit(-1);
     }
+    if(isInstalled && reinstall) {
+        Util.removeSimulatorApp(bundleID, target, xcode);
+    }
     Util.installSimulatorApp(app, target, xcode);
 }
 
