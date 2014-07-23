@@ -71,6 +71,12 @@ public class Util {
             System.exit(-1);
         }
         
+        if(!xcodeApp?.file) {
+            println "Error: The target OS version, ${targetOS}, could not be found on the system. Make sure " +
+                "the format of the target OS is of the format 7.0 or 7.0-64.";
+            System.exit(-1);
+        }
+        
         def targetOSWithVersion = xcodeApp.getText();
         if(targetOSWithVersion == null || targetOSWithVersion.trim().length() == 0) {
             println "Error: the SystemVersion.plist file is empty.";
@@ -508,6 +514,11 @@ public class Util {
             output = builder.toString();
             if("OK" != output?.trim()) {
                 println "Error: Failed to install the application on the device.";
+                println "Explanation: This error can occur if the application is not " +
+                    "built for the correct target.";
+                println "User response: Verify the application is built for the correct " +
+                    "target (for example, iphoneos or iphonesimulator) and architecture " +
+                    "(for example, 64-bit).";
                 System.exit(-1);
             }
         }
@@ -516,7 +527,7 @@ public class Util {
     
     /**
     * Runs the mobiledevice command for finding an application on a device. 
-    * app: The name (.app) or package of the application (.ipa or .app) to find.
+    * app: The name (.app) or bundle ID of the application (.ipa or .app) to find.
     * isPkg: Boolean whether the supplied app is being searched by package.
     * udid: The optional device identifier. Only one of udid or name can be provided.
     * name: The optional name of the device. Only one of udid or name can be provided.
@@ -575,6 +586,11 @@ public class Util {
         if(!bundleID?.trim()) {
             println "Error: An application bundle ID must be provided for application " +
                 "removal.";
+            System.exit(-1);
+        }
+        boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
+        if(!isInstalled) {
+            println "Error: The application with bundle ID ${bundleID} is not installed.";
             System.exit(-1);
         }
         args << bundleID;
