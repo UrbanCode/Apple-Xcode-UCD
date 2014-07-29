@@ -27,47 +27,51 @@
       <property name="app" required="true">
         <property-ui type="textBox"
                      label="Application Path"
-                     description="The iOS application (.app or .ipa) to install."
+                     description="The path to the iOS application (.app or .ipa file) 
+                        to install on the target. The default value is the 
+                        application property that is configured in the component 
+                        properties."
                      default-value="${p:component/application}"/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier to target install on a 
-                        physical device. Note: If the Device Identifier is specified, 
-                        the Target OS will not be used."
+                     description="The unique device identifier of the physical device 
+                        that is the installation target. If the Device Identifier is 
+                        specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="target">
         <property-ui type="textBox"
                      label="Target OS and Optional Architecture"
-                     description="The target OS or SDK version and optional 64-bit 
-                        architecture, for example, 6.1 or 7.1-64."
+                     description="The target OS and optional 64-bit architecture, 
+                        for example, 6.1 or 7.1-64."
                      default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
                      label="Reinstall"
-                     description="Reinstall the app."/>
+                     description="Reinstall the app. You must select this option if 
+                        the app is already installed in the target. Otherwise, the 
+                        step fails."/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation for locating the SDK. 
-                        If the value is not specified, a default value of 
-                        /Applications/Xcode.app is used. Xcode will be used to create the 
-                        targetOS directory if the targetOS directory provided by the user does 
-                        not exist."
+                     description="The path to the Xcode installation. If no value is 
+                        specified, the default value /Applications/Xcode.app is used. 
+                        Xcode will be used to create the targetOS directory if the 
+                        targetOS directory provided by the user does not exist."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
                      label="Timeout"
-                     description="A timeout (in milliseconds), after which the 
-                        device install attempt is stopped. By default, the step uses a
-                        time out of 5 minutes. Note: This property applies to devices 
-                        only."
+                     description="The amount of time (in milliseconds) to attempt to 
+                        install the app on the target device. By default, the step 
+                        uses a time out of 5 minutes. This property does not apply 
+                        to simulators."
                      default-value="300000"
                      hidden="true"/>
       </property>
@@ -118,42 +122,43 @@
     <properties>
       <property name="bundleID" required="true">
         <property-ui type="textBox"
-                     label="Application Bundle ID"
-                     description="The bundle ID of the application to remove, for 
-                     example, com.example.appName."
+                     label="Bundle Identifier"
+                     description="The bundle identifier of the application to 
+                        remove, for example, com.example.appName. The default 
+                        value is the bundle identifier that is configured in 
+                        the component properties."
                      default-value="${p:component/bundleID}"/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier to target install on a 
-                        physical device. Note: If the device identifier is specified, 
-                        the Target OS will not be used."
+                     description="The unique device identifier of the physical device 
+                        that is the removal target. If the Device Identifier is 
+                        specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="target">
         <property-ui type="textBox"
                      label="Target OS and Optional Architecture"
-                     description="The target OS or SDK version and optional 64-bit 
-                        architecture, for example, 6.1 or 7.1-64."
+                     description="The target OS and optional 64-bit architecture, 
+                        for example, 6.1 or 7.1-64."
                      default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation for locating the SDK. 
-                        If the value is not specified, a default value of 
-                        /Applications/Xcode.app is used."
+                     description="The path to the Xcode installation. If no value is 
+                        specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
                      label="Timeout"
-                     description="A timeout (in milliseconds), after which the 
-                        device install attempt is stopped. By default, the step uses a
-                        time out of 5 minutes. Note: This property applies to devices 
-                        only."
+                     description="The amount of time (in milliseconds) to attempt to 
+                        uninstall the app on the target device. By default, the step 
+                        uses a time out of 5 minutes. This property does not apply 
+                        to simulators."
                      default-value="300000"
                      hidden="true"/>
       </property>
@@ -178,12 +183,17 @@
   <!-- Test based steps -->
   
   <step-type name="UI Test">
-    <description>Runs the specified UI test against the application.</description>
+    <description>
+        Runs the specified test case that simulates a user interacting with 
+        an application.
+    </description>
     <properties>
       <property name="app" required="true">
         <property-ui type="textBox"
                      label="Application Path"
-                     description="The iOS application (.app or .ipa) to test."
+                     description="The path to the iOS application (.app or .ipa file) 
+                        to test on the target. The default value is the application 
+                        property that is configured in the component properties."
                      default-value="${p:component/application}"/>
       </property>
       <property name="script" required="true">
@@ -194,15 +204,17 @@
       <property name="outputDir" required="true">
         <property-ui type="textBox"
                      label="Output Directory"
-                     description="The directory where the test output should be written to."
+                     description="The directory for test output."
                      default-value="."/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier to target testing on a 
-                        physical device. Note: If the Device Identifier is specified, 
-                        the Simulator Type and Target OS will not be used."
+                     description="The unique device identifier of the physical 
+                        device that is the test target. If you are testing on a 
+                        device, then you must first install the app. If the 
+                        Device Identifier is specified, then the Target OS 
+                        value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simType">
@@ -221,9 +233,8 @@
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation for locating the
-                        Trace Template. If the value is not specified, a default value 
-                        of /Applications/Xcode.app is used."
+                     description="The path to the Xcode installation. If no value is 
+                        specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
@@ -253,7 +264,7 @@
                      label="Timeout"
                      description="A timeout (in milliseconds), after which the 
                         UI test are stopped. By default, the step does not 
-                        time out when no value is specified."
+                        time out."
                      hidden="true"/>
       </property>
     </properties>
@@ -313,8 +324,7 @@
         <property-ui type="textBox"
                      label="Workspace Name"
                      description="The name of the workspace to use when testing.
-                        Note: If a project is specified, the workspace will not
-                        be used."/>
+                        If a project is specified, the workspace value is ignored."/>
       </property>
       <property name="scheme" required="true">
         <property-ui type="textBox"
@@ -327,15 +337,15 @@
                      description="A line separated list or file of Strings representing 
                         the destination to test against using the xcodebuild syntax.
                         For example, &quot;platform=iOS Simulator,name=iPhone,OS=7.1&quot;. 
-                        Note: If the Destination String is specified, the Device Identifier, 
-                        Simulator Type and Target OS will not be used."/>
+                        If the Destination String is specified, the Device Identifier, 
+                        Simulator Type and Target OS are ignored."/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier to target testing on a 
-                        physical device. Note: If the Device Identifier is specified, 
-                        the Simulator Type and Target OS will not be used."
+                     description="The unique device identifier of the physical device 
+                        that is the test target. If the Device Identifier is 
+                        specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simType">
@@ -356,9 +366,10 @@
       <property name="destinationTimeout">
         <property-ui type="textBox"
                      label="Destination search timeout"
-                     description="The timeout for searching for the target test 
-                        destination. The system default is used if no value is 
-                        specified (see &quot;man xcodebuild&quot; for details)."
+                     description="The amount of time to search for the test target. 
+                        If the target is not located, the step fails. The system 
+                        default is used if no value is specified (see &quot;man 
+                        xcodebuild&quot; for details)."
                      hidden="true"/>
       </property>
       <property name="xcrunPath">
@@ -374,8 +385,8 @@
         <property-ui type="textBox"
                      label="Timeout"
                      description="A timeout (in milliseconds), after which the 
-                        unit test is stopped. By default, the step does 
-                        not time out when no value is specified."
+                        unit test stops. By default, the step does not 
+                        time out."
                      hidden="true"/>
       </property>
     </properties>
@@ -412,17 +423,16 @@
       <property name="additionalArgs">
         <property-ui type="textAreaBox"
                      label="Additional Arguments"
-                     description="Allows for providing additional arguments that are not
-                        provided in the step properties for the xcrun command. The 
+                     description="Additional arguments for the xcrun tool. The 
                         format can be a path to a file or a newLine-separated list 
                         of arguments. For example, /opt/test.properties or --show-sdk-path."/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
                      label="Timeout"
-                     description="A timeout (in milliseconds), after which the 
-                        xcrun process command is stopped. By default, the step does 
-                        not time out when no value is specified."
+                     description="The amount of time (in milliseconds) to attempt to 
+                        run the xcrun command on the target. By default, the step does 
+                        not time out."
                      hidden="true"/>
       </property>
     </properties>
@@ -466,9 +476,8 @@
       <property name="xcode">
         <property-ui type="textBox"
                      label="Path To Xcode"
-                     description="The path to the Xcode installation for locating the SDK. 
-                        If the value is not specified, a default value of 
-                        /Applications/Xcode.app is used."
+                     description="The path to the Xcode installation. If no value is 
+                        specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
