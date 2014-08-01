@@ -13,7 +13,8 @@
   <header>
     <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="1"/>
     <description>
-        Provides mobile support for working with Apple Xcode.
+        Provides mobile support for working with Apple Xcode to deploy 
+        iOS applications.
     </description>
     <tag>Mobile/Apple Xcode</tag>
     <server:required-server-version>6.0.1.0</server:required-server-version>
@@ -37,7 +38,7 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the installation target. If the Device Identifier is 
+                        that is the installation target. If the device identifier is 
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
@@ -57,11 +58,11 @@
       </property>
       <property name="xcode">
         <property-ui type="textBox"
-                     label="Path To Xcode"
+                     label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
                         specified, the default value /Applications/Xcode.app is used. 
-                        Xcode will be used to create the targetOS directory if the 
-                        targetOS directory provided by the user does not exist."
+                        Xcode is used to create the targetOS directory if the 
+                        provided targetOS directory does not exist."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
@@ -70,7 +71,7 @@
                      label="Timeout"
                      description="The amount of time (in milliseconds) to attempt to 
                         install the app on the target device. By default, the step 
-                        uses a time out of 5 minutes. This property does not apply 
+                        uses a timeout of 5 minutes. This property does not apply 
                         to simulators."
                      default-value="300000"
                      hidden="true"/>
@@ -133,7 +134,7 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the removal target. If the Device Identifier is 
+                        that is the removal target. If the device identifier is 
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
@@ -146,7 +147,7 @@
       </property>
       <property name="xcode">
         <property-ui type="textBox"
-                     label="Path To Xcode"
+                     label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
                         specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
@@ -157,7 +158,7 @@
                      label="Timeout"
                      description="The amount of time (in milliseconds) to attempt to 
                         uninstall the app on the target device. By default, the step 
-                        uses a time out of 5 minutes. This property does not apply 
+                        uses a timeout of 5 minutes. This property does not apply 
                         to simulators."
                      default-value="300000"
                      hidden="true"/>
@@ -213,7 +214,7 @@
                      description="The unique device identifier of the physical 
                         device that is the test target. If you are testing on a 
                         device, then you must first install the app. If the 
-                        Device Identifier is specified, then the Target OS 
+                        device identifier is specified, then the Target OS 
                         value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
@@ -227,12 +228,12 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
-                     label="Path To Xcode"
+                     label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
                         specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
@@ -241,18 +242,18 @@
       <property name="traceTemplate">
         <property-ui type="textBox"
                      label="Trace Template"
-                     description="The path, relative to the Xcode installation 
-                        path, for the .tracetemplate file to use when running
-                        the UI test. If no value is specified, a default value
-                        of /Contents/Applications/Instruments.app/Contents/PlugIns/
-                        AutomationInstrument.bundle/Contents/Resources/
-                        Automation.tracetemplate is used."
+                     description="The path, which is specified as relative to the 
+                        Xcode installation path, for the .tracetemplate file to 
+                        use when the UI test is run. If no value is specified, a 
+                        default value of /Contents/Applications/Instruments.app/
+                        Contents/PlugIns/AutomationInstrument.bundle/Contents/
+                        Resources/Automation.tracetemplate is used."
                      default-value="${p?:resource/XcodeTraceTemplate}"
                      hidden="true"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
-                     label="Path To xcrun"
+                     label="Path to xcrun"
                      description="The path to the xcrun tool. If the 
                         value is not specified, the value from the
                         system path is used."
@@ -318,34 +319,34 @@
       <property name="project">
         <property-ui type="textBox"
                      label="Project Name"
-                     description="The name of the project to use when testing."/>
+                     description="The name of the project to use for testing."/>
       </property>
       <property name="workspace">
         <property-ui type="textBox"
                      label="Workspace Name"
-                     description="The name of the workspace to use when testing.
+                     description="The name of the workspace to use for testing.
                         If a project is specified, the workspace value is ignored."/>
       </property>
       <property name="scheme" required="true">
         <property-ui type="textBox"
                      label="Scheme Name"
-                     description="The name of the scheme to use when testing."/>
+                     description="The name of the scheme to use for testing."/>
       </property>
       <property name="destination">
         <property-ui type="textAreaBox"
                      label="Destination String"
-                     description="A line separated list or file of Strings representing 
-                        the destination to test against using the xcodebuild syntax.
+                     description="A line-separated list or file of strings that represents 
+                        the destination to test against by using the xcodebuild syntax.
                         For example, &quot;platform=iOS Simulator,name=iPhone,OS=7.1&quot;. 
-                        If the Destination String is specified, the Device Identifier, 
-                        Simulator Type and Target OS are ignored."/>
+                        If the destination string is specified, the device identifier, 
+                        simulator type, and target OS are ignored."/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the test target. If the Device Identifier is 
-                        specified, then the Target OS value is ignored."
+                        that is the test target. If the device identifier is 
+                        specified, then the target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simType">
@@ -358,23 +359,23 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1.
-                        Note: If no Target OS is specified, the default value of latest 
+                     description="The target OS, for example, 6.1 or 7.1.
+                        Note: If no target OS is specified, the default most recent value 
                         is used."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="destinationTimeout">
         <property-ui type="textBox"
-                     label="Destination search timeout"
+                     label="Destination Search Timeout"
                      description="The amount of time to search for the test target. 
                         If the target is not located, the step fails. The system 
-                        default is used if no value is specified (see &quot;man 
-                        xcodebuild&quot; for details)."
+                        default value is used if no value is specified. (See 
+                        &quot;man xcodebuild&quot; for details)."
                      hidden="true"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
-                     label="Path To xcrun"
+                     label="Path to xcrun"
                      description="The path to the xcrun tool. If the 
                         value is not specified, the value from the
                         system path is used."
@@ -414,7 +415,7 @@
     <properties>
       <property name="xcrunPath">
         <property-ui type="textBox"
-                     label="Path To xcrun"
+                     label="Path to xcrun"
                      description="The path to the xcrun tool. If the 
                         value is not specified, the value from the
                         system path is used."
@@ -424,7 +425,7 @@
         <property-ui type="textAreaBox"
                      label="Additional Arguments"
                      description="Additional arguments for the xcrun tool. The 
-                        format can be a path to a file or a newLine-separated list 
+                        format can be a path to a file or a new line-separated list 
                         of arguments. For example, /opt/test.properties or --show-sdk-path."/>
       </property>
       <property name="timeout">
@@ -470,12 +471,12 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS or SDK version, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
-                     label="Path To Xcode"
+                     label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
                         specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
@@ -485,7 +486,7 @@
         <property-ui type="textBox"
                      label="Startup Polling Maximum Retries"
                      description="The maximum number of times to attempt polling for
-                        simulator startup every 10 seconds. The default value is 10."
+                        a simulator startup every 10 seconds. The default value is 10."
                      default-value="10"
                      hidden="true"/>
       </property>
