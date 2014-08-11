@@ -205,7 +205,9 @@
       <property name="outputDir" required="true">
         <property-ui type="textBox"
                      label="Output Directory"
-                     description="The directory for test output."
+                     description="The directory for test output. The directory
+                        must exist before you specify it. If the path that you 
+                        specify for output does not exist, the process fails."
                      default-value="."/>
       </property>
       <property name="udid">
