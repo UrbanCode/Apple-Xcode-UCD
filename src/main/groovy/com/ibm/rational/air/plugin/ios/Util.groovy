@@ -828,12 +828,11 @@ public class Util {
                 e.getMessage();
             System.exit(-1);
         }
-        
-        if(simDir == null || !simDir.isDirectory()){
-            println "Error: the simulator directory with version " + targetOSWithVersion + 
-            " was not found."
+
+        if(simDir == null || !simDir.isDirectory()) {
+            println "The (" +simDir.canonicalPath + ") simulator directory with version " + 
+                targetOSWithVersion + " was not found.";
         } else {
-        
             try {
                 simDir = new File(simDir, "Applications");
             } catch (Exception e) {
@@ -842,20 +841,19 @@ public class Util {
                 System.exit(-1);
             }
             
-            if(simDir == null){
-                println "Error: the simulator application directory was not found."
+            if(simDir == null) {
+                println "Error: the simulator application directory was not found.";
             }
             
-            if(!simDir.exists()){
+            if(!simDir.exists()) {
                 if(!simDir.mkdir()) {
                     println "An error occurred during an attempt to create the application " +
                         "directory: " + simDir.canonicalPath;
                     System.exit(-1);
                 }
             }
-
-        }  
-        println "The simulator path is: " + simDir.canonicalPath;
+            println "The simulator path is: " + simDir.canonicalPath;
+        }
         return simDir;
     }
     
@@ -921,6 +919,8 @@ public class Util {
         if(!simDir.isDirectory()) {
             //If the simulator directory doesn't exist, we try to create the directory.
             createSimulatorDir(targetOS, xcode, is64Bit);
+            // Get the application path now that the simulator directory exists.
+            simDir = getSimulatorPath(target, xcode);
         }
         println "Installing into simulator: " + simDir.canonicalPath;
         
