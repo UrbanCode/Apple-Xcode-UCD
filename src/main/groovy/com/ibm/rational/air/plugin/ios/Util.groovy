@@ -822,16 +822,39 @@ public class Util {
         try {
             simDir = new File(System.getProperty("user.home") + File.separator + "Library" +
                 File.separator + "Application Support" + File.separator + "iPhone Simulator" +
-                File.separator + targetOSWithVersion + File.separator + "Applications");
+                File.separator + targetOSWithVersion);
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator: " +
                 e.getMessage();
             System.exit(-1);
         }
-        if(simDir == null){
-            println "Error: the simulator directory was not found."
-            System.exit(-1);
-        }
+        
+        if(simDir == null || !simDir.isDirectory()){
+            println "Error: the simulator directory with version " + targetOSWithVersion + 
+            " was not found."
+        } else {
+        
+            try {
+                simDir = new File(simDir, "Applications");
+            } catch (Exception e) {
+                println "An error occurred during an attempt to access the simulator " + 
+                        "application directory: " + e.getMessage();
+                System.exit(-1);
+            }
+            
+            if(simDir == null){
+                println "Error: the simulator application directory was not found."
+            }
+            
+            if(!simDir.exists()){
+                if(!simDir.mkdir()) {
+                    println "An error occurred during an attempt to create the application " +
+                        "directory: " + simDir.canonicalPath;
+                    System.exit(-1);
+                }
+            }
+
+        }  
         println "The simulator path is: " + simDir.canonicalPath;
         return simDir;
     }
