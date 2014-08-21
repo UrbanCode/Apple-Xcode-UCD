@@ -18,6 +18,7 @@ def udid = props['udid']
 def target = props['target']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
 def xcode = props['xcode']?: "/Applications/Xcode.app"
+def xcrunPath = props['xcrunPath']
 def timeout = props['timeout']?: "300000"
 
 Util.assertMacOS();
@@ -36,6 +37,7 @@ if(!bundleID) {
 
 // The target is a device.
 if (udid) {
+    Util.isUDIDValid(xcrunPath, udid);
     boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
     if(isInstalled && !reinstall) {
         println "Error: The application ${app} is already installed."

@@ -30,6 +30,7 @@ Util.assertMacOS();
 def args = ["instruments"];
 // Target the physical device, if one is specified.
 if(udid) {
+    Util.isUDIDValid(xcrunPath, udid);
     args << "-w";
     args << udid.trim();
 } else {

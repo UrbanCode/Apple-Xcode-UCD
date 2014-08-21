@@ -17,12 +17,14 @@ def bundleID = props['bundleID']
 def udid = props['udid']
 def target = props['target']
 def xcode = props['xcode']?: "/Applications/Xcode.app"
+def xcrunPath = props['xcrunPath']
 def timeout = props['timeout']?: "300000"
 
 Util.assertMacOS();
 
 // The target is a device.
 if (udid) {
+    Util.isUDIDValid(xcrunPath, udid);
     def result = Util.removeDeviceApp(bundleID, udid, null, timeout);
     if(result != 0) {
         println "Error: An error code of " + result + " occurred during " +

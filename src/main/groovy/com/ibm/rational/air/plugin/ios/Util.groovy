@@ -49,6 +49,37 @@ public class Util {
     }
     
     /**
+    * Checks if the provided unique device identifier, UDID, is valid (i.e. available
+    * on the system for use).
+    * xcrunPath: An optional path to the xcrun tool.
+    * udid: The unique device identifier.
+    */
+    public static void isUDIDValid(def xcrunPath, def udid) {
+        def args = ['instruments', '-s', 'devices'];
+        int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+            // Determine if the UDID is in the list. The identifier will be surrounded
+            // by parantheses, so we add those to make sure the entire String is found.
+            log = log.find(/.*\(${udid}\)/);
+            if(log == null) {
+                println "Error: The " + udid + " device identifier could not be found.";
+                println "Explanation: This error can occur if the device identifier is " +
+                    "incorrect or the device is not attached.";
+                println "User response: Verify the device identifier is correct and " +
+                    "the device is attached to the agent computer.";
+                System.exit(-1);
+            }
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
+    }
+    
+    /**
     * Get the target OS version 
     * targetOS: The OS of the simulator to find the target OS with version
     *   (without architecture option e.g 7.0).

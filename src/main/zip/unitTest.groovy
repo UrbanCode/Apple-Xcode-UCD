@@ -92,6 +92,7 @@ if(destination) {
         }
     }
 } else if (udid) {
+    Util.isUDIDValid(xcrunPath, udid);
     args << "-destination";
     args << "platform=iOS,id=" + udid.trim();
 } else {

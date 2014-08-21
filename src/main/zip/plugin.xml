@@ -66,6 +66,15 @@
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path to xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
+                     hidden="true"/>
+      </property>
       <property name="timeout">
         <property-ui type="textBox"
                      label="Timeout"
@@ -151,6 +160,15 @@
                      description="The path to the Xcode installation. If no value is 
                         specified, the default value /Applications/Xcode.app is used."
                      default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
+      </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path to xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
       <property name="timeout">
