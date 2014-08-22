@@ -53,7 +53,7 @@ public class Util {
     * on the system for use).
     * xcrunPath: An optional path to the xcrun tool.
     * udid: The unique device identifier.
-    */
+    **/
     public static void isUDIDValid(def xcrunPath, def udid) {
         def args = ['instruments', '-s', 'devices'];
         int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
@@ -84,7 +84,7 @@ public class Util {
     * for use).
     * xcrunPath: An optional path to the xcrun tool.
     * simType: The simulator configuration type to check.
-    */
+    **/
     public static void isSimTypeValid(def xcrunPath, def simType) {
         def args = ['instruments', '-s', 'devices'];
         int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
@@ -118,6 +118,144 @@ public class Util {
             println "Error: Running the Xcrun command failed with error code: " + result;
             System.exit(-1);
         }
+    }
+    
+    /**
+    * Checks if the provided application is valid for the device platform.
+    * pathToApp: The local path to the .app directory to validate.
+    **/
+    public static void isAppValidForDeviceArch(def pathToApp) {
+        def appDir;
+        try {
+            appDir = new File(pathToApp);
+        } catch (Exception e) {
+            println "The application file could not be accessed: " +
+                e.getMessage();
+            System.exit(-1);
+        }
+        if(!appDir?.isDirectory()) {
+            println "The path to the application was not found.";
+            System.exit(-1);
+        }
+        
+        def deviceSupported = false;
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        appDir.eachFile { infoFile ->
+            if (infoFile.name == "Info.plist") {
+                def infoPath = appDir.canonicalPath + File.separator + 'info';
+                def args = ['defaults', 'read', infoPath, 'CFBundleSupportedPlatforms'];
+                ch.runCommand("Check supported platforms.", args) { proc ->
+                    InputStream inStream =  proc.getInputStream();
+                    inStream.eachLine { line ->
+                        if (!deviceSupported && line.trim() == "iPhoneOS"){
+                            deviceSupported = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(!deviceSupported) {
+            println "Error: The device architecture does not support the application.";
+            println "Explanation: This error can occur if the application is not " +
+                "built for the iphoneos configuration.";
+            println "User response: Verify that the application is built for the correct " +
+                "target, for example, iphoneos.";
+            System.exit(-1);
+        }
+    }
+    
+    /**
+    * Checks if the provided application is valid for the target configuration.
+    * archToCheck: This can be either a target (The OS platform target where the 
+    *    application is installed (with architecture option e.g 7.0-64)) or a
+    *    simType (The simulator configuration type to check).
+    * pathToApp: The local path to the .app directory to validate.
+    **/
+    public static void isAppValidForSimArch(def archToCheck, def pathToApp) {
+        def appDir;
+        try {
+            appDir = new File(pathToApp);
+        } catch (Exception e) {
+            println "The application file could not be accessed: " +
+                e.getMessage();
+            System.exit(-1);
+        }
+        if(!appDir?.isDirectory()) {
+            println "The path to the application was not found.";
+            System.exit(-1);
+        }
+        
+        def bundleName = null;
+        def simulatorSupported = false;
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        appDir.eachFile { infoFile ->
+            if (infoFile.name == "Info.plist") {
+                def infoPath = appDir.canonicalPath + File.separator + 'info';
+                def args = ['defaults', 'read', infoPath, 'CFBundleName'];
+                ch.runCommand("Check bundle name.", args) { proc ->
+                    InputStream inStream =  proc.getInputStream();
+                    List lines = inStream.readLines();
+                    if(lines.size == 0) {
+                        println "The bundle name was not found.";
+                        System.exit(-1);
+                    }
+                    //The first line is the bundle name (ignore the new line).
+                    bundleName = lines.get(0);
+                }
+                args = ['defaults', 'read', infoPath, 'CFBundleSupportedPlatforms'];
+                ch.runCommand("Check supported platforms.", args) { proc ->
+                    InputStream inStream =  proc.getInputStream();
+                    inStream.eachLine { line ->
+                        if (!simulatorSupported && line.trim() == "iPhoneSimulator"){
+                            simulatorSupported = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(!simulatorSupported) {
+            println "Error: The simulator architecture does not support the application.";
+            println "Explanation: This error can occur if the application is not " +
+                "built for the iphonesimulator configuration.";
+            println "User response: Verify the application is built for the correct " +
+                "target, for example, iphonesimulator.";
+            System.exit(-1);
+        }
+        
+        // Run the file command to check the architecture of the app.
+        def arch = null;
+        def args = ['file', appDir.canonicalPath + File.separator + bundleName];
+        ch.runCommand("Check app architecture.", args) { proc ->
+            InputStream inStream =  proc.getInputStream();
+            List lines = inStream.readLines();
+            if(lines.size == 0) {
+                println "The application architecture could not be found.";
+                System.exit(-1);
+            }
+            //The first line is the architecture (ignore the new line).
+            arch = lines.get(0);
+        }
+        // 64-bit targets should be able to run 32-bit and 64-bit apps
+        if(archToCheck.contains("-64") || archToCheck.contains("64-bit")) {
+            if(arch.contains("i386") || arch.contains("x86_64")) {
+                return;
+            }
+        } else {
+            // 32-bit target supports only 32-bit apps
+            if(arch.contains("i386")) {
+                return;
+            }
+        }
+        println "Error: The target simulator does not support the application architecture.";
+        println "Explanation: This error can occur if the application is not " +
+            "built for the architecture that is in use.";
+        println "User response: Verify that the application is built for the specified " +
+            "architecture (for example, 64-bit).";
+        System.exit(-1);
     }
     
     /**

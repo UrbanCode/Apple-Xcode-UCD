@@ -37,6 +37,7 @@ if(!bundleID) {
 
 // The target is a device.
 if (udid) {
+    Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
     boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
     if(isInstalled && !reinstall) {
@@ -54,6 +55,8 @@ if (udid) {
         println "Error: No application install target was specified.";
         System.exit(-1);
     }
+    
+    Util.isAppValidForSimArch(target, appFile);
     
     boolean isInstalled = Util.findSimulatorApp(bundleID, target, xcode);
     if(isInstalled && !reinstall) {

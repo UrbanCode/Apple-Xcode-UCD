@@ -28,8 +28,10 @@ def timeout = props['timeout']
 Util.assertMacOS();
 
 def args = ["instruments"];
+def appFile = Util.handleApplication(app);
 // Target the physical device, if one is specified.
 if(udid) {
+    Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
     args << "-w";
     args << udid.trim();
@@ -41,7 +43,8 @@ if(udid) {
         System.exit(-1);
     }
     if(simType && targetOS) {
-        Util.isSimTypeValid(xcrunPath, simType.trim()); 
+        Util.isAppValidForSimArch(target, appFile);
+        Util.isSimTypeValid(xcrunPath, simType.trim());
         // Build up the String for the target.
         args << "-w";
         args << simType.trim() + " - Simulator - iOS " + targetOS.trim();
@@ -76,7 +79,7 @@ if(!traceTemplatePath.file) {
 args << "-t";
 args << traceTemplatePath.canonicalPath;
 
-args << Util.handleApplication(app);
+args << appFile;
 
 def scriptFile;
 try {
