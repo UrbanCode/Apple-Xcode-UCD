@@ -112,11 +112,11 @@ public class Util {
             
             log = log.find(/${eSimType}\s-.*-\siOS\s${targetOS}/);
             if(log == null) {
-                println "Error: The " + simType + " simulator type with target os " + 
+                println "Error: The " + simType + " simulator type with target OS " + 
                     targetOS + " could not be found.";
                 println "Explanation: This error can occur if the simulator type or " +
-                    "target os is incorrect.";
-                println "User response: Verify the simulator type and target os is "
+                    "target OS is incorrect.";
+                println "User response: Verify that the simulator type and target OS are "
                     "correct on the agent computer.";
                 System.exit(-1);
             }

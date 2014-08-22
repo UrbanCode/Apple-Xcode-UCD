@@ -21,6 +21,7 @@ final def props = apTool.getStepProperties();
 def simType = props['simType']?: ""
 def targetOS = props['targetOS']?: ""
 def xcode = props['xcode']?: "/Applications/Xcode.app"
+def xcrunPath = props['xcrunPath']
 int startupRetries = Integer.parseInt(props['startupRetries']?:"10")
 
 Util.assertMacOS();
