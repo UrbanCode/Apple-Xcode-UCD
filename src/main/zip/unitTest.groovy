@@ -103,7 +103,7 @@ if(destination) {
             "specifying the simulator target to unit test against.";
         System.exit(-1);
     }
-    Util.isSimTypeValid(xcrunPath, simType.trim());
+    Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
     
     args << "-destination";
     if(targetOS) {

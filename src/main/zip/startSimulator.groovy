@@ -30,7 +30,7 @@ if(Util.isSimulatorRunning()) {
     System.exit(-1);
 }
 
-Util.isSimTypeValid(xcrunPath, simType.trim());
+Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
 
 Util.startSimulator(simType, targetOS, xcode);
 

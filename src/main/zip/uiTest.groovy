@@ -44,7 +44,7 @@ if(udid) {
     }
     if(simType && targetOS) {
         Util.isAppValidForSimArch(targetOS, appFile);
-        Util.isSimTypeValid(xcrunPath, simType.trim());
+        Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
         // Build up the String for the target.
         args << "-w";
         args << simType.trim() + " - Simulator - iOS " + targetOS.trim();

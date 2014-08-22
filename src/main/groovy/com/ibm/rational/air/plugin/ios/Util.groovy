@@ -84,8 +84,14 @@ public class Util {
     * for use).
     * xcrunPath: An optional path to the xcrun tool.
     * simType: The simulator configuration type to check.
+    * targetOS: The OS of the simulator to find the target OS with version
+    *   (without architecture option e.g 7.0).
     **/
-    public static void isSimTypeValid(def xcrunPath, def simType) {
+    public static void isSimTypeValid(def xcrunPath, def simType, def targetOS) {
+        if(simType == null || targetOS == null) {
+            println "Error: The Simulator Type and Target OS must be specified.";
+            System.exit(-1);
+        }
         def args = ['instruments', '-s', 'devices'];
         int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
             null) { builder ->
@@ -104,13 +110,14 @@ public class Util {
             eSimType = eSimType.replaceAll("\\)", "\\\\)");
             eSimType = eSimType.replaceAll("\\.", "\\\\.");
             
-            log = log.find(/${eSimType}\s-/);
+            log = log.find(/${eSimType}\s-.*-\siOS\s${targetOS}/);
             if(log == null) {
-                println "Error: The " + simType + " simulator type could not be found.";
-                println "Explanation: This error can occur if the simulator type is " +
-                    "incorrect.";
-                println "User response: Verify the simulator type is correct on the " +
-                    "agent computer.";
+                println "Error: The " + simType + " simulator type with target os " + 
+                    targetOS + " could not be found.";
+                println "Explanation: This error can occur if the simulator type or " +
+                    "target os is incorrect.";
+                println "User response: Verify the simulator type and target os is "
+                    "correct on the agent computer.";
                 System.exit(-1);
             }
         }
