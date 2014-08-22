@@ -43,7 +43,7 @@ if(udid) {
         System.exit(-1);
     }
     if(simType && targetOS) {
-        Util.isAppValidForSimArch(target, appFile);
+        Util.isAppValidForSimArch(targetOS, appFile);
         Util.isSimTypeValid(xcrunPath, simType.trim());
         // Build up the String for the target.
         args << "-w";
