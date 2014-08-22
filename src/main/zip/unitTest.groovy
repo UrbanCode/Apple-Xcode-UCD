@@ -85,6 +85,7 @@ if(destination) {
         destination = inFile.getText();
         System.out.println("Reading destination from: " + inFile.getCanonicalFile());
     }
+    // The destinations are verified by the xcodebuild command automatically.
     destination.eachLine { it ->
         if(it?.trim()) {
             args << "-destination";
@@ -102,6 +103,8 @@ if(destination) {
             "specifying the simulator target to unit test against.";
         System.exit(-1);
     }
+    Util.isSimTypeValid(xcrunPath, simType.trim());
+    
     args << "-destination";
     if(targetOS) {
         // Build up the String for the target.

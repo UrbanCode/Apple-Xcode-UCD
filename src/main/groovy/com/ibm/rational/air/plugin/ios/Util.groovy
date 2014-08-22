@@ -80,6 +80,47 @@ public class Util {
     }
     
     /**
+    * Checks if the provided simulator type is valid (i.e. available on the system 
+    * for use).
+    * xcrunPath: An optional path to the xcrun tool.
+    * simType: The simulator configuration type to check.
+    */
+    public static void isSimTypeValid(def xcrunPath, def simType) {
+        def args = ['instruments', '-s', 'devices'];
+        int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+            /*
+            * Determine if the simulator type is in the list. The simulator starts at
+            * the beginning of the line and is followed by a space and dash, so we 
+            * add those to the end to make sure the entire String is found.
+            *
+            * First, we escape the special characters that can be part of the simulator
+            * String. In particular '.', '(', and ')'.
+            */
+            String eSimType = simType.replaceAll("\\(", "\\\\(");
+            eSimType = eSimType.replaceAll("\\)", "\\\\)");
+            eSimType = eSimType.replaceAll("\\.", "\\\\.");
+            
+            log = log.find(/${eSimType}\s-/);
+            if(log == null) {
+                println "Error: The " + simType + " simulator type could not be found.";
+                println "Explanation: This error can occur if the simulator type is " +
+                    "incorrect.";
+                println "User response: Verify the simulator type is correct on the " +
+                    "agent computer.";
+                System.exit(-1);
+            }
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
+    }
+    
+    /**
     * Get the target OS version 
     * targetOS: The OS of the simulator to find the target OS with version
     *   (without architecture option e.g 7.0).

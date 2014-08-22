@@ -41,6 +41,7 @@ if(udid) {
         System.exit(-1);
     }
     if(simType && targetOS) {
+        Util.isSimTypeValid(xcrunPath, simType.trim()); 
         // Build up the String for the target.
         args << "-w";
         args << simType.trim() + " - Simulator - iOS " + targetOS.trim();
