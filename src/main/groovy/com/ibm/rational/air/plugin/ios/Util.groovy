@@ -116,7 +116,7 @@ public class Util {
                     targetOS + " could not be found.";
                 println "Explanation: This error can occur if the simulator type or " +
                     "target OS is incorrect.";
-                println "User response: Verify that the simulator type and target OS are "
+                println "User response: Verify that the simulator type and target OS are " +
                     "correct on the agent computer.";
                 System.exit(-1);
             }
