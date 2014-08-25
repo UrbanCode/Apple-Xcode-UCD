@@ -246,6 +246,10 @@ public class Util {
             //The first line is the architecture (ignore the new line).
             arch = lines.get(0);
         }
+        
+        println "The architecture of the simulator: " + archToCheck;
+        println "Output of the file command (Tip: The app architecture is typically " +
+            "at the end and of the form i386 or x86_64): " + arch;
         // 64-bit targets should be able to run 32-bit and 64-bit apps
         if(archToCheck.contains("-64") || archToCheck.contains("64-bit")) {
             if(arch.contains("i386") || arch.contains("x86_64")) {
