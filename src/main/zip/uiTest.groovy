@@ -43,7 +43,8 @@ if(udid) {
         System.exit(-1);
     }
     if(simType && targetOS) {
-        Util.isAppValidForSimArch(simType, appFile);
+        def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+        Util.isAppValidForSimArch(simUDID, appFile);
         Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
         // Build up the String for the target.
         args << "-w";

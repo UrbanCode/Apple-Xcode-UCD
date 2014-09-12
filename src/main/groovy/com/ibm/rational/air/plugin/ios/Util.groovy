@@ -49,6 +49,42 @@ public class Util {
     }
     
     /**
+    * Checks if a specific simulator is running on the agent machine.
+    * udid: The unique identifier of the simulator.
+    * xcrunPath: An optional path to the xcrun tool.
+    * Returns true if the simulator is running, false otherwise.
+    **/
+    public static boolean isSimulatorRunning(def udid, def xcrunPath) {
+        def isStarted = false;
+        def args = ['simctl', 'list', 'devices'];
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        int result = runXcrunCmd("Checking simulator status.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+            // Locate the simulator entry by udid.
+            log = log.find(/.*\(${udid}\).*/);
+            if(log == null) {
+                println "Error: The simulator with UDID " + udid + " could not be found.";
+                println "Explanation: This error can occur if the simulator configuration" +
+                    "does not exist.";
+                println "User response: Verify the simulator type and target OS are " +
+                    "correct for the UDID, and the simulator exists.";
+                System.exit(-1);
+            }
+            // Pull out the status from the entry.
+            isStarted = log.contains("Booted");
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
+        return isStarted;
+    }
+    
+    /**
     * Checks if the provided unique device identifier, UDID, is valid (i.e. available
     * on the system for use).
     * xcrunPath: An optional path to the xcrun tool.
@@ -63,7 +99,7 @@ public class Util {
             println log;
             // Determine if the UDID is in the list. The identifier will be surrounded
             // by parantheses, so we add those to make sure the entire String is found.
-            log = log.find(/.*\(${udid}\)/);
+            log = log.find(/.*\[${udid}\]/);
             if(log == null) {
                 println "Error: The " + udid + " device identifier could not be found.";
                 println "Explanation: This error can occur if the device identifier is " +
@@ -175,12 +211,10 @@ public class Util {
     
     /**
     * Checks if the provided application is valid for the target configuration.
-    * archToCheck: This can be either a target (The OS platform target where the 
-    *    application is installed (with architecture option e.g 7.0-64)) or a
-    *    simType (The simulator configuration type to check).
+    * udid: The unique device identifier of the simulator to check.
     * pathToApp: The local path to the .app directory to validate.
     **/
-    public static void isAppValidForSimArch(def archToCheck, def pathToApp) {
+    public static void isAppValidForSimArch(def udid, def pathToApp) {
         def appDir;
         try {
             appDir = new File(pathToApp);
@@ -195,7 +229,6 @@ public class Util {
         }
         
         def bundleName = null;
-        def simulatorSupported = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
         appDir.eachFile { infoFile ->
@@ -212,25 +245,7 @@ public class Util {
                     //The first line is the bundle name (ignore the new line).
                     bundleName = lines.get(0);
                 }
-                args = ['defaults', 'read', infoPath, 'CFBundleSupportedPlatforms'];
-                ch.runCommand("Check supported platforms.", args) { proc ->
-                    InputStream inStream =  proc.getInputStream();
-                    inStream.eachLine { line ->
-                        if (!simulatorSupported && line.trim() == "iPhoneSimulator"){
-                            simulatorSupported = true;
-                        }
-                    }
-                }
             }
-        }
-        
-        if(!simulatorSupported) {
-            println "Error: The simulator architecture does not support the application.";
-            println "Explanation: This error can occur if the application is not " +
-                "built for the iphonesimulator configuration.";
-            println "User response: Verify the application is built for the correct " +
-                "target, for example, iphonesimulator.";
-            System.exit(-1);
         }
         
         // Run the file command to check the architecture of the app.
@@ -247,26 +262,56 @@ public class Util {
             arch = lines.get(0);
         }
         
-        println "The architecture of the simulator: " + archToCheck;
+        // Determine the simulator version.
+        def deviceInfo = getSimulatorPath(udid);
+        try {
+            deviceInfo = new File(deviceInfo, "device.plist");
+        } catch (Exception e) {
+            println "An error occurred during an attempt to access the simulator device " +
+                "plist file: " + e.getMessage();
+            System.exit(-1);
+        }
+        
+        if (deviceInfo == null || !deviceInfo.file){
+            println "Error: Not able to find the simulator device plist file: " + 
+                    deviceInfo.canonicalPath;
+            System.exit(-1);
+        }
+        def simDeviceType;
+        args = ['defaults', 'read', deviceInfo, 'deviceType'];
+        ch.runCommand("Check simulator device type.", args) { proc ->
+            InputStream inStream =  proc.getInputStream();
+            List lines = inStream.readLines();
+            if(lines.size == 0) {
+                println "The simulator device type was not found.";
+                System.exit(-1);
+            }
+            //The first line is the device type (ignore the new line).
+            simDeviceType = lines.get(0);
+        }
+        
+        println "The simulator device type to check: " + simDeviceType;
         println "Output of the file command (Tip: The app architecture is typically " +
             "at the end and of the form i386 or x86_64): " + arch;
-        // 64-bit targets should be able to run 32-bit and 64-bit apps
-        if(archToCheck.contains("-64") || archToCheck.contains("64-bit")) {
-            if(arch.contains("i386") || arch.contains("x86_64")) {
-                return;
-            }
-        } else {
-            // 32-bit target supports only 32-bit apps
-            if(arch.contains("i386")) {
-                return;
-            }
+        /*
+        * 64-bit targets should be able to run 32-bit and 64-bit apps
+        * Check if the device is in the list of 32-bit platforms.
+        * Otherwise, we can run the application on the simulator.
+        */
+        if((simDeviceType.contains("com.apple.CoreSimulator.SimDeviceType.iPhone-4s") ||
+            simDeviceType.contains("com.apple.CoreSimulator.SimDeviceType.iPhone-5") ||
+            simDeviceType.contains("com.apple.CoreSimulator.SimDeviceType.iPad-2") ||
+            simDeviceType.contains("com.apple.CoreSimulator.SimDeviceType.iPad-Retina")) &&
+            arch.contains("x86_64")) {
+        
+            println "Error: The target simulator does not support the application " +
+                "architecture.";
+            println "Explanation: This error can occur if the application is not " +
+                "built for the architecture that is in use.";
+            println "User response: Verify that the application is built for the specified " +
+                "architecture (for example, 32-bit).";
+            System.exit(-1);
         }
-        println "Error: The target simulator does not support the application architecture.";
-        println "Explanation: This error can occur if the application is not " +
-            "built for the architecture that is in use.";
-        println "User response: Verify that the application is built for the specified " +
-            "architecture (for example, 64-bit).";
-        System.exit(-1);
     }
     
     /**
@@ -831,42 +876,32 @@ public class Util {
     /**
     * Runs the command for removing an application from a simulator.
     * bundleID: The bundle ID of the application to remove.
-    * target: The OS platform target where the application is installed (with architecture option e.g 7.0-64).
-    * xcode: The path to Xcode used for starting the simulator.
+    * udid: The unique device identifier of the simulator to check.
+    * xcrunPath: An optional path to the xcrun tool.
     * Returns the status of the removal command.
     **/
-    public static void removeSimulatorApp(def bundleID, def target, def xcode) { 
-        def appFound = false;
-        def simDir = getSimulatorPath(target, xcode);
-        if(!simDir.isDirectory()) {
-            println "Error: The path to the simulator is incorrect: " +
-                simDir.canonicalPath;
+    public static void removeSimulatorApp(def bundleID, def udid, def xcrunPath) { 
+        if(!isSimulatorRunning(udid, xcrunPath)) {
+            println "Error: The simulator must be running when uninstalling an app " +
+                "from the simulator.";
             System.exit(-1);
         }
-        def ch = new CommandHelper(new File('.'));
-        ch.ignoreExitValue(true);
-        simDir.eachDir { uuidDir ->
-            uuidDir.eachDir { appDir ->
-                appDir.eachFile { infoFile ->
-                    if (infoFile.name == "Info.plist") {
-                        def infoPath = appDir.canonicalPath + File.separator + 'info';
-                        def args = ['defaults', 'read', infoPath, 'CFBundleIdentifier'];
-                        ch.runCommand("read app bundle ID", args) { proc ->
-                            InputStream inStream =  proc.getInputStream();
-                            inStream.eachLine { line ->
-                                if (line == bundleID){
-                                    appFound = true;
-                                    println "Uninstalling the app from the simulator. ";
-                                    uuidDir.deleteDir();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (!appFound){
+        
+        if(!findSimulatorApp(bundleID, udid)) {
             println "Error: The application with bundle ID ${bundleID} is not installed.";
+            System.exit(-1);
+        }
+        
+        def args = ['simctl', 'uninstall', udid, bundleID];
+        // If the app is not installed, no error occurs.
+        int result = runXcrunCmd("Uninstalling the app from the simulator.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
             System.exit(-1);
         }
     }
@@ -942,16 +977,24 @@ public class Util {
     /**
     * Determines if the supplied application is installed on the simulator. 
     * bundleID: The bundle ID of the application to find.
-    * target: The OS simulator target to check for the installed application (with architecture option e.g: 7.0-64).
-    * xcode: The path to Xcode used for finding the simulator application.
+    * udid: The unique device identifier of the simulator to check.
     * Returns whether the application was found.
     **/
-    public static boolean findSimulatorApp(def bundleID, def target, def xcode) {
-        def simDir = getSimulatorPath(target, xcode);
-        if(!simDir.isDirectory()) {
-            println "The path to the simulator was not found.";
+    public static boolean findSimulatorApp(def bundleID, def udid) {
+        def simDir = getSimulatorPath(udid);
+        try {
+            simDir = new File(simDir, "data" + File.separator + "Applications");
+        } catch (Exception e) {
+            println "An error occurred during an attempt to access the simulator " + 
+                    "application directory: " + e.getMessage();
+            System.exit(-1);
+        }
+        
+        if(simDir == null || !simDir.isDirectory()) {
+            println "The simulator application directory was not found.";
             return false;
         }
+        
         def appFound = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
@@ -974,6 +1017,46 @@ public class Util {
             }
         }
         return appFound;
+    }
+    
+    /**
+    * Determines the UDID of the simulator.
+    * simType: The simulator configuration type to check.
+    * targetOS: The OS of the simulator to find the target OS with version.
+    * xcrunPath: An optional path to the xcrun tool.
+    * Returns UDID of the specified simulator.
+    **/
+    public static String findSimulatorUDID(def simType, def targetOS, def xcrunPath) {
+        def udid;
+        def ch = new CommandHelper(new File('.'));
+        ch.ignoreExitValue(true);
+        def args = ['instruments', '-s', 'devices'];
+        int result = runXcrunCmd("Finding the simulator UDID.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+            // Locate the simulator entry by simType and targetOS.
+            log = log.find(/${simType.trim()}\s\(${targetOS.trim()}(\.\d)?\sSimulator.*/);
+            if(log == null) {
+                println "Error: The simulator with simulator type " + simType + 
+                    " and target OS " + targetOS + " could not be found.";
+                println "Explanation: This error can occur if the simulator type or " +
+                    "target OS are incorrect.";
+                println "User response: Verify the simulator type and target OS are " +
+                    "correct.";
+                System.exit(-1);
+            }
+            // Pull out the UDID from the list.
+            udid = log.split("\\[")[1];
+            udid = udid.split("\\]")[0];
+            println "The simulator UDID is: " + udid;
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
+        return udid;
     }
     
     /**
@@ -1018,205 +1101,56 @@ public class Util {
     }
     
     /**
-    * Finds the path to the target simulator installation.
-    * target: The OS platform target to install the application into (with architecture option e.g: 7.0-64).
-    * xcode: The path to Xcode used for getting the simulator path.
-    * Returns the File path to the target simulator installation.
+    * Builds up the path to the target simulator installation.
+    * udid: The unique device identifier of the simulator to check.
+    * Returns the path to the target simulator installation.
     **/
-    private static File getSimulatorPath(def target, def xcode) {
-        if(!target?.trim()) {
-            println "Error: A target OS must be specified.";
-            System.exit(-1);
-        }
-        
-        def archLevel = ""; // architecture level can be -64 or an empty string
-        def targetOS = target; // the OS platform target without the architecture option
-        if(target.contains("-64")){
-            archLevel = "-64";
-            targetOS = target.substring(0, target.indexOf("-64"));
-        }
-        def targetOSWithVersion = getTargetOSVersion(targetOS, xcode); //e.g return 7.0.3
-        targetOSWithVersion += archLevel; //e.g return 7.0.3-64
-        
-        // Build up the directory to the install and verify the directories exist.
+    private static File getSimulatorPath(def udid) {
         def simDir;
         try {
-            simDir = new File(System.getProperty("user.home") + File.separator + "Library" +
-                File.separator + "Application Support" + File.separator + "iPhone Simulator" +
-                File.separator + targetOSWithVersion);
+            simDir = new File(System.getProperty("user.home") + File.separator + 
+                "Library" + File.separator + "Developer" + File.separator + 
+                "CoreSimulator" + File.separator + "Devices" + File.separator + udid);
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator: " +
                 e.getMessage();
             System.exit(-1);
         }
-
-        if(simDir == null || !simDir.isDirectory()) {
-            println "The (" +simDir.canonicalPath + ") simulator directory with version " + 
-                targetOSWithVersion + " was not found.";
-        } else {
-            try {
-                simDir = new File(simDir, "Applications");
-            } catch (Exception e) {
-                println "An error occurred during an attempt to access the simulator " + 
-                        "application directory: " + e.getMessage();
-                System.exit(-1);
-            }
-            
-            if(simDir == null) {
-                println "Error: the simulator application directory was not found.";
-            }
-            
-            if(!simDir.exists()) {
-                if(!simDir.mkdir()) {
-                    println "An error occurred during an attempt to create the application " +
-                        "directory: " + simDir.canonicalPath;
-                    System.exit(-1);
-                }
-            }
-            println "The simulator path is: " + simDir.canonicalPath;
+        
+        if (simDir == null || !simDir.isDirectory()) {
+            println "Error: Not able to find the simulator directory: " + 
+                    simDir.canonicalPath;
+            System.exit(-1);
         }
+        println "The simulator path is: " + simDir.canonicalPath;
         return simDir;
-    }
-    
-    /**
-    * Create a simulator directory for a given target OS:
-    * targetOS: The OS platform target to install the application into (without architecture option e.g: 7.0).
-    * xcode: The path to Xcode used for starting the simulator.
-    * is64Bit: the architecture option
-    **/
-    private static void createSimulatorDir(def targetOS, def xcode, boolean is64Bit){
-        println "Creating a simulator directory for target OS: " + targetOS;
-        //Starting simulator;
-        def simulatorType;
-        if(is64Bit) {
-            simulatorType = "iPhone Retina (4-inch 64-bit)";
-        } else {
-            simulatorType = "iPhone Retina (4-inch)";
-        }
-        // Only one simulator can run at a time.
-        if(isSimulatorRunning()) {
-            println "A simulator is already running.";
-            System.exit(-1);
-        }
-        startSimulator(simulatorType, targetOS, xcode);
-        if(!Util.isSimulatorRunning()) {
-            println "The simulator failed to start.";
-            System.exit(-1);
-        }
-        println "Wait for the simulator to start.";
-        waitForSimulator(10, simulatorType, targetOS, xcode);
-        
-        //Stopping simulator;
-        if(!isSimulatorRunning()) {
-            println "No simulator was running.";
-            System.exit(-1);
-        }
-        Util.stopSimulator();
-        if(Util.isSimulatorRunning()) {
-            println "The simulator failed to stop during simulator creation "+
-                    "of the target OS ${targetOS}.";
-            System.exit(-1);
-        }
-        println "The simulator has stopped.";
-        
-        println "The simulator directory is created";
     }
     
     /**
     * Installs the supplied application on the target simulator. 
     * app: The path to the application (.ipa or .app) to install.
-    * target: The OS platform target to install the application into (with architecture option e.g. 7.0-64).
-    * xcode: The path to Xcode used for starting the simulator.
+    * udid: The unique device identifier of the simulator to check.
+    * xcrunPath: An optional path to the xcrun tool.
     * Returns the status of the install command.
     **/
-    public static void installSimulatorApp(def app, def target, def xcode) {
-        boolean is64Bit = false;
-        def targetOS = target; // the OS platform target without the architecture option
-        if(target.contains("-64")){
-            targetOS = target.substring(0, target.indexOf("-64"));
-            is64Bit = true;
-        }
-        def simDir = getSimulatorPath(target, xcode);
-        if(!simDir.isDirectory()) {
-            //If the simulator directory doesn't exist, we try to create the directory.
-            createSimulatorDir(targetOS, xcode, is64Bit);
-            // Get the application path now that the simulator directory exists.
-            simDir = getSimulatorPath(target, xcode);
-        }
-        println "Installing into simulator: " + simDir.canonicalPath;
-        
-        // Generate a UUID as the application installation directory.
-        def uuid = UUID.randomUUID().toString();
-        try {
-            simDir = new File(simDir, uuid);
-        } catch (Exception e) {
-            println "An error occurred during an attempt to setup the application " +
-                "directory: " + e.getMessage();
+    public static void installSimulatorApp(def app, def udid, def xcrunPath) {
+        if(!isSimulatorRunning(udid, xcrunPath)) {
+            println "Error: The simulator must be running when installing an app " +
+                "on the simulator.";
             System.exit(-1);
         }
         
-        // Create the structure for the application in the simulator.
-        if(!simDir.mkdir()) {
-            println "An error occurred during an attempt to create the application " +
-                "directory: " + simDir.canonicalPath;
-            System.exit(-1);
+        def args = ['simctl', 'install', udid, app];
+        // If the app is already installed, then no message appears. The simulator must be running.
+        int result = runXcrunCmd("Installing the app on the simulator.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
         }
-        
-        def docDir;
-        try {
-            docDir = new File(simDir, "Documents");
-        } catch (Exception e) {
-            println "An error occurred during an attempt to setup the application " +
-                "Documents directory: " + e.getMessage();
-            System.exit(-1);
-        }
-        if(!docDir.mkdir()) {
-            println "An error occurred during an attempt to create the application " +
-                "Documents directory: " + docDir.canonicalPath;
-            System.exit(-1);
-        }
-        
-        def libDir;
-        try {
-            libDir = new File(simDir, "Library");
-        } catch (Exception e) {
-            println "An error occurred during an attempt to setup the application " +
-                "Library directory: " + e.getMessage();
-            System.exit(-1);
-        }
-        if(!libDir.mkdir()) {
-            println "An error occurred during an attempt to create the application " +
-                "Library directory: " + libDir.canonicalPath;
-            System.exit(-1);
-        }
-        
-        def tmpDir;
-        try {
-            tmpDir = new File(simDir, "tmp");
-        } catch (Exception e) {
-            println "An error occurred during an attempt to setup the application " +
-                "tmp directory: " + e.getMessage();
-            System.exit(-1);
-        }
-        if(!tmpDir.mkdir()) {
-            println "An error occurred during an attempt to create the application " +
-                "tmp directory: " + tmpDir.canonicalPath;
-            System.exit(-1);
-        }
-        
-        println "The application will be installed into: " + simDir.canonicalPath;
-        
-        // Copy the .app file to the simulator directory to retain permissions.
-        def appPath = handleApplication(app)
-        def ch = new CommandHelper(new File('.'));
-        def args = ['cp', '-r', appPath, simDir];
-
-        def result = ch.runCommand("Installing the app on the simulator.", args);
         if(result != 0) {
-            println "Error: Running the copy command to install the application into " +
-                "the simulator failed with this error code: ${result}.";
-            println "Removing the attempted install.";
-            simDir.deleteDir();
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
         }
     }
 

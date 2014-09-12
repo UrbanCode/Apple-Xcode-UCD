@@ -36,5 +36,8 @@
     <release-note plugin-version="1">
       This plug-in provides access to steps for interacting with mobile iOS applications.
     </release-note>
+    <release-note plugin-version="2">
+      Adds support for integrating with Apple Xcode 6.
+    </release-note>
   </release-notes>
 </pluginInfo>

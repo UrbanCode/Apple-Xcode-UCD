@@ -11,7 +11,7 @@
         xmlns:server="http://www.urbancode.com/PluginServerXMLSchema_v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <header>
-    <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="1"/>
+    <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="2"/>
     <description>
         Provides mobile support for working with Apple Xcode to deploy 
         iOS applications.
@@ -42,12 +42,18 @@
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="target">
+      <property name="simType">
         <property-ui type="textBox"
-                     label="Target OS and Optional Architecture"
-                     description="The target OS and optional 64-bit architecture, 
-                        for example, 6.1 or 7.1-64."
-                     default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
+                     label="Simulator Type"
+                     description="The simulator device type, for example, iPhone or 
+                        iPhone Retina (4-inch 64-bit)."
+                     default-value="${p?:resource/simulatorType}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS, for example, 6.1 or 7.1."
+                     default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
@@ -55,16 +61,6 @@
                      description="Reinstall the app. You must select this option if 
                         the app is already installed in the target. Otherwise, the 
                         step fails."/>
-      </property>
-      <property name="xcode">
-        <property-ui type="textBox"
-                     label="Path to Xcode"
-                     description="The path to the Xcode installation. If no value is 
-                        specified, the default value /Applications/Xcode.app is used. 
-                        Xcode is used to create the targetOS directory if the 
-                        provided targetOS directory does not exist."
-                     default-value="${p?:resource/XcodePath}"
-                     hidden="true"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
@@ -147,20 +143,18 @@
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="target">
+      <property name="simType">
         <property-ui type="textBox"
-                     label="Target OS and Optional Architecture"
-                     description="The target OS and optional 64-bit architecture, 
-                        for example, 6.1 or 7.1-64."
-                     default-value="${p?:resource/simulatorOS}${p?:resource/simulatorArch}"/>
+                     label="Simulator Type"
+                     description="The simulator device type, for example, iPhone or 
+                        iPhone Retina (4-inch 64-bit)."
+                     default-value="${p?:resource/simulatorType}"/>
       </property>
-      <property name="xcode">
+      <property name="targetOS">
         <property-ui type="textBox"
-                     label="Path to Xcode"
-                     description="The path to the Xcode installation. If no value is 
-                        specified, the default value /Applications/Xcode.app is used."
-                     default-value="${p?:resource/XcodePath}"
-                     hidden="true"/>
+                     label="Target OS"
+                     description="The target OS, for example, 6.1 or 7.1."
+                     default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"

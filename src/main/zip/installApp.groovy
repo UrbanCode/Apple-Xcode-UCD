@@ -15,9 +15,9 @@ final def props = apTool.getStepProperties();
 
 def app = props['app']
 def udid = props['udid']
-def target = props['target']
+def simType = props['simType']
+def targetOS = props['targetOS']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
-def xcode = props['xcode']?: "/Applications/Xcode.app"
 def xcrunPath = props['xcrunPath']
 def timeout = props['timeout']?: "300000"
 
@@ -39,10 +39,14 @@ if(!bundleID) {
 if (udid) {
     Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
-    boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
-    if(isInstalled && !reinstall) {
-        println "Error: The application ${app} is already installed."
-        System.exit(-1);
+    // If we are reinstalling, we don't need to check if the app is installed
+    // since the application will be overwritten.
+    if(!reinstall) {
+        boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
+        if(isInstalled) {
+            println "Error: The application ${app} is already installed."
+            System.exit(-1);
+        }
     }
     def result = Util.installDeviceApp(app, udid, null, timeout);
     if(result != 0) {
@@ -51,22 +55,24 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if(!target?.trim()) {
-        println "Error: No application install target was specified.";
+    if((simType && !targetOS ) || (!simType && targetOS)) {
+        println "Error: Both the Simulator Type and Target OS must be specified " +
+                    "for application install.";
         System.exit(-1);
     }
+    def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    Util.isAppValidForSimArch(simUDID, appFile);
     
-    Util.isAppValidForSimArch(target, appFile);
-    
-    boolean isInstalled = Util.findSimulatorApp(bundleID, target, xcode);
-    if(isInstalled && !reinstall) {
-        println "Error: The application ${app} is already installed."
-        System.exit(-1);
+    // If we are reinstalling, we don't need to check if the app is installed
+    // since the application will be overwritten.
+    if(!reinstall) {
+        boolean isInstalled = Util.findSimulatorApp(bundleID, simUDID);
+        if(isInstalled) {
+            println "Error: The application ${app} is already installed."
+            System.exit(-1);
+        }
     }
-    if(isInstalled && reinstall) {
-        Util.removeSimulatorApp(bundleID, target, xcode);
-    }
-    Util.installSimulatorApp(app, target, xcode);
+    Util.installSimulatorApp(app, simUDID, xcrunPath);
 }
 
 println "The Install Application step completed.";

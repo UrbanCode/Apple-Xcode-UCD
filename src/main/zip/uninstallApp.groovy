@@ -15,8 +15,8 @@ final def props = apTool.getStepProperties();
 
 def bundleID = props['bundleID']
 def udid = props['udid']
-def target = props['target']
-def xcode = props['xcode']?: "/Applications/Xcode.app"
+def simType = props['simType']
+def targetOS = props['targetOS']
 def xcrunPath = props['xcrunPath']
 def timeout = props['timeout']?: "300000"
 
@@ -32,11 +32,13 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if(!target?.trim()) {
-        println "Error: No application removal target was specified.";
+    if((simType && !targetOS ) || (!simType && targetOS)) {
+        println "Error: Both the Simulator Type and Target OS must be specified " +
+                    "for application removal.";
         System.exit(-1);
     }
-    Util.removeSimulatorApp(bundleID, target, xcode);
+    def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    Util.removeSimulatorApp(bundleID, simUDID, xcrunPath);
 }
 
 println "The Remove Application step completed.";
