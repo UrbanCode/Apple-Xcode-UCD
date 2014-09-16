@@ -18,7 +18,6 @@ import com.urbancode.air.CommandHelper;
 public class Util {
     /**
     * Util Standard Variables' Names:
-    * target: The OS of the simulator with architecture option (e.g: 7.0-64).
     * targetOS: The OS of the simulator without architecture option (e.g: 7.0).
     * targetOSWithVersion: The OS of the simulator with version without architecture option (e.g: 7.0.3).
     * simType: The simulator type (e.g: 'iPhone Retina (4-inch 64-bit)', 'iPhone Retina (4-inch)').
@@ -98,7 +97,7 @@ public class Util {
             // Output the log to the console.
             println log;
             // Determine if the UDID is in the list. The identifier will be surrounded
-            // by parantheses, so we add those to make sure the entire String is found.
+            // by square brackets, so we add those to make sure the entire String is found.
             log = log.find(/.*\[${udid}\]/);
             if(log == null) {
                 println "Error: The " + udid + " device identifier could not be found.";
@@ -135,18 +134,13 @@ public class Util {
             // Output the log to the console.
             println log;
             /*
-            * Determine if the simulator type is in the list. The simulator starts at
-            * the beginning of the line and is followed by a space and dash, so we 
-            * add those to the end to make sure the entire String is found.
-            *
-            * First, we escape the special characters that can be part of the simulator
-            * String. In particular '.', '(', and ')'.
+            * Determine if the simulator type is in the list. The simulator entry 
+            * starts at the beginning of the line with the name, and is followed by 
+            * the target OS version, including the maintenance version. It is possible
+            * that the name could include characters that need to be escaped, so we 
+            * quote the entries provided by the user.
             */
-            String eSimType = simType.replaceAll("\\(", "\\\\(");
-            eSimType = eSimType.replaceAll("\\)", "\\\\)");
-            eSimType = eSimType.replaceAll("\\.", "\\\\.");
-            
-            log = log.find(/${eSimType}\s-.*-\siOS\s${targetOS}/);
+            log = log.find(/\Q${simType}\E\s\(\Q${targetOS}\E(\.\d)?\sSimulator\).*/);
             if(log == null) {
                 println "Error: The " + simType + " simulator type with target OS " + 
                     targetOS + " could not be found.";
@@ -1022,7 +1016,9 @@ public class Util {
     /**
     * Determines the UDID of the simulator.
     * simType: The simulator configuration type to check.
-    * targetOS: The OS of the simulator to find the target OS with version.
+    * targetOS: The OS of the simulator to find the target OS with version. If the
+    *   version is an empty String, the latest version is returned. This is used
+    *   in the Unit test scenario.
     * xcrunPath: An optional path to the xcrun tool.
     * Returns UDID of the specified simulator.
     **/
@@ -1036,8 +1032,26 @@ public class Util {
             def log = builder.toString();
             // Output the log to the console.
             println log;
-            // Locate the simulator entry by simType and targetOS.
-            log = log.find(/${simType.trim()}\s\(${targetOS.trim()}(\.\d)?\sSimulator.*/);
+            /*
+            * Determine if the simulator type is in the list. The simulator entry 
+            * starts at the beginning of the line with the name, and is followed by 
+            * the target OS version, including the maintenance version. It is possible
+            * that the name could include characters that need to be escaped, so we 
+            * quote the entries provided by the user.
+            *
+            * The target OS version can be empty when running a Unit Test, since the
+            * user could be targeting the latest OS. In this case, we look for the
+            * simulator name only.
+            *
+            */
+            if(targetOS.length() == 0) {
+                // The entries should be sorted, so we take the last one with the
+                // corresponding simulator name.
+                def entries = log.findAll(/\Q${simType.trim()}\E\s\(\d\.\d(\.\d)?\sSimulator\).*/);
+                log = entries.get(entries.size()-1);
+            } else {
+                log = log.find(/\Q${simType.trim()}\E\s\(\Q${targetOS.trim()}\E(\.\d)?\sSimulator\).*/);
+            }
             if(log == null) {
                 println "Error: The simulator with simulator type " + simType + 
                     " and target OS " + targetOS + " could not be found.";

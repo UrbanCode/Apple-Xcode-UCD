@@ -33,8 +33,6 @@ def appFile = Util.handleApplication(app);
 if(udid) {
     Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
-    args << "-w";
-    args << udid.trim();
 } else {
     // Check if only one of the simulator target properties are set.
     if((simType && !targetOS ) || (!simType && targetOS)) {
@@ -43,14 +41,16 @@ if(udid) {
         System.exit(-1);
     }
     if(simType && targetOS) {
-        def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
-        Util.isAppValidForSimArch(simUDID, appFile);
-        Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
-        // Build up the String for the target.
-        args << "-w";
-        args << simType.trim() + " - Simulator - iOS " + targetOS.trim();
+        udid = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+        Util.isAppValidForSimArch(udid, appFile);
     }
-    // Otherwise, the default Simulator is used.
+}
+
+// Build up the String for the target using the UDID of the device or simulator,
+// if none is specified, the default Simulator is used.
+if(udid) {
+    args << "-w";
+    args << udid.trim();
 }
 
 def xcodeApp = Util.verifyXcodePath(xcode);
@@ -58,7 +58,7 @@ def xcodeApp = Util.verifyXcodePath(xcode);
 if(!traceTemplate) {
     traceTemplate = new String(File.separator + "Contents" + File.separator + "Applications" +
         File.separator + "Instruments.app" + File.separator + "Contents" + File.separator +
-        "PlugIns" + File.separator + "AutomationInstrument.bundle" + File.separator +
+        "PlugIns" + File.separator + "AutomationInstrument.xrplugin" + File.separator +
         "Contents" + File.separator + "Resources" + File.separator +
         "Automation.tracetemplate");
 }
@@ -86,7 +86,7 @@ def scriptFile;
 try {
     scriptFile = new File(script);
 } catch (Exception e) {
-    println "An error occurred during an atempt to access the script " +
+    println "An error occurred during an attempt to access the script " +
         "file " + script + ": " + e.getMessage();
     System.exit(-1);
 }
