@@ -20,7 +20,6 @@ final def props = apTool.getStepProperties();
 
 def simType = props['simType']?: ""
 def targetOS = props['targetOS']?: ""
-def xcode = props['xcode']?: "/Applications/Xcode.app"
 def xcrunPath = props['xcrunPath']
 int startupRetries = Integer.parseInt(props['startupRetries']?:"10")
 
@@ -31,17 +30,23 @@ if(Util.isSimulatorRunning()) {
     System.exit(-1);
 }
 
-Util.isSimTypeValid(xcrunPath, simType.trim(), targetOS.trim());
+def simUDID = Util.findSimulatorUDID(simType.trim(), targetOS.trim(), xcrunPath);
 
-Util.startSimulator(simType, targetOS, xcode);
+Util.startSimulator(simUDID);
 
-if(!Util.isSimulatorRunning()) {
-    println "The simulator failed to start.";
-    System.exit(-1);
+for (int i = 0; i < startupRetries; i++){
+    if(Util.isSimulatorRunning(simUDID, xcrunPath)) {
+        break;
+    } else {
+        if (i < (startupRetries-1)) {
+            Thread.sleep(10000);
+        } else {
+            println "The simulator failed to start.";
+            System.exit(-1);
+        }
+    }
 }
-
-println "Wait for the simulator to start.";
-Util.waitForSimulator(startupRetries, simType, targetOS, xcode);
 
 println "The simulator has started.";
 System.exit(0);
+

@@ -42,7 +42,7 @@ public class Util {
     public static boolean isSimulatorRunning() {
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
-        def args = ['pgrep', 'iPhone Simulator'];
+        def args = ['pgrep', 'iOS Simulator'];
         // The exit value is 0 for when a simulator is running, 1 otherwise.
         return !ch.runCommand("Checking simulator status.", args);
     }
@@ -113,50 +113,7 @@ public class Util {
             System.exit(-1);
         }
     }
-    
-    /**
-    * Checks if the provided simulator type is valid (i.e. available on the system 
-    * for use).
-    * xcrunPath: An optional path to the xcrun tool.
-    * simType: The simulator configuration type to check.
-    * targetOS: The OS of the simulator to find the target OS with version
-    *   (without architecture option e.g 7.0).
-    **/
-    public static void isSimTypeValid(def xcrunPath, def simType, def targetOS) {
-        if(simType == null || targetOS == null) {
-            println "Error: The Simulator Type and Target OS must be specified.";
-            System.exit(-1);
-        }
-        def args = ['instruments', '-s', 'devices'];
-        int result = runXcrunCmd("Verifying device IDs.", args, xcrunPath,
-            null) { builder ->
-            def log = builder.toString();
-            // Output the log to the console.
-            println log;
-            /*
-            * Determine if the simulator type is in the list. The simulator entry 
-            * starts at the beginning of the line with the name, and is followed by 
-            * the target OS version, including the maintenance version. It is possible
-            * that the name could include characters that need to be escaped, so we 
-            * quote the entries provided by the user.
-            */
-            log = log.find(/\Q${simType}\E\s\(\Q${targetOS}\E(\.\d)?\sSimulator\).*/);
-            if(log == null) {
-                println "Error: The " + simType + " simulator type with target OS " + 
-                    targetOS + " could not be found.";
-                println "Explanation: This error can occur if the simulator type or " +
-                    "target OS is incorrect.";
-                println "User response: Verify that the simulator type and target OS are " +
-                    "correct on the agent computer.";
-                System.exit(-1);
-            }
-        }
-        if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
-            System.exit(-1);
-        }
-    }
-    
+        
     /**
     * Checks if the provided application is valid for the device platform.
     * pathToApp: The local path to the .app directory to validate.
@@ -307,198 +264,37 @@ public class Util {
             System.exit(-1);
         }
     }
-    
+
     /**
-    * Get the target OS version 
-    * targetOS: The OS of the simulator to find the target OS with version
-    *   (without architecture option e.g 7.0).
-    * xcode: The path to Xcode used for finding the simulator.
-    **/
-    private static String getTargetOSVersion(def targetOS, def xcode) {
-        def xcodeApp = Util.verifyXcodePath(xcode);
-        try {
-            def pathToVersion = new String(File.separator + "Contents" + File.separator +
-                "Developer" + File.separator + "Platforms" + File.separator +
-                "iPhoneSimulator.platform" + File.separator + "Developer" + File.separator +
-                "SDKs" + File.separator + "iPhoneSimulator" + targetOS + ".sdk" + File.separator +
-                "System" + File.separator + "Library" + File.separator + "CoreServices" +
-                File.separator +"SystemVersion.plist");
-            xcodeApp = new File(xcodeApp, pathToVersion);
-        } catch (Exception e) {
-            println "An error occurred during an attempt to access the SystemVersion.plist file of target OS " +
-                targetOS;
-            println  "Exception message:" + e.getMessage();
-            System.exit(-1);
-        }
-        
-        if(!xcodeApp?.file) {
-            println "Error: The target OS version, ${targetOS}, could not be found on the system. Make sure " +
-                "the format of the target OS is of the format 7.0 or 7.0-64.";
-            System.exit(-1);
-        }
-        
-        def targetOSWithVersion = xcodeApp.getText();
-        if(targetOSWithVersion == null || targetOSWithVersion.trim().length() == 0) {
-            println "Error: the SystemVersion.plist file is empty.";
-            System.exit(-1);
-        }
-        
-        targetOSWithVersion = targetOSWithVersion.find(/ProductVersion.*\n.*/);
-        targetOSWithVersion = targetOSWithVersion.find(/(\d+\.)+\d+/);
-        println "The target OS version is " + targetOSWithVersion;
-        return targetOSWithVersion;
-    }
-    
-    /**
-    * Checks whether a simulator started based on a maximum retry number for each
-    *    10-second interval.
-    * startupRetries: The polling frequency. That is, how many times to check every
-    *    10 seconds for the simulator status.
-    * simType: The simulator configuration type to check.
-    * targetOS: The OS of the simulator to check (without architecture option e.g 7.0).
-    * xcode: The path to Xcode used for checking the simulator.
-    **/
-    public static void waitForSimulator(int startupRetries, def simType, def targetOS, def xcode) {
-        def targetOSWithVersion = getTargetOSVersion(targetOS, xcode);
-        
-        def archLevel = "";
-        if (simType.contains("64-bit"))
-            archLevel = "-64";
-        def syslogPath;
-        try {
-            syslogPath = new File(System.getProperty("user.home") + File.separator + "Library" +
-                File.separator + "Logs" + File.separator + "iOS Simulator" +
-                File.separator + targetOSWithVersion + archLevel + File.separator + "system.log");
-        } catch (Exception e) {
-            println "An error occurred during an attempt to access the simulator log file: " +
-                e.getMessage();
-            System.exit(-1);
-        }
-        
-        //If the iOS Simulator system.log file is not found (e.g any OS level lower than 7.0),
-        //check the system level log file.
-        if (!syslogPath.file){
-            println "Not able to find the iOS Simulator log file: " + 
-                    syslogPath.canonicalPath;
-            println "Checking the system level log file."
-            syslogPath = new File("/var/log/system.log");
-            
-            if (!syslogPath.file){
-                println "Error: The path to the system level log file is incorrect: " +
-                        syslogPath.canonicalPath;
-                    System.exit(-1);
-            }
-        }
-        
-        def args = ['tail', '-n', '-0', '-F', syslogPath];
-        def ch = new CommandHelper(new File('.'));
-        boolean foundSimulator = false;
-        int MAX_TRIES = startupRetries;
-        int SLEEP = 10000;
-        
-        def builder = new StringBuilder();
-        def errOut = new StringBuilder();
-        // The process is interrupted when a simulator is found.
-        // So we ignore the exit value since it will return 1.
-        ch.ignoreExitValue(true);
-        println "Waiting for the simulator to start.";
-        try {
-            ch.runCommand(null, args) {
-                proc ->
-                // store stdout and stderr for processing
-                proc.consumeProcessOutput(builder, errOut)
-                for(int i = 0; !foundSimulator && i < MAX_TRIES; i++) {
-                    def devices = builder.toString();
-                    if(devices.contains("SIMToolkit plugin for SpringBoard initialized")){
-                        foundSimulator = true;
-                    } else {
-                        if (i != (MAX_TRIES-1))
-                            Thread.sleep(SLEEP);
-                    }
-                }
-                // End the process and report the status.
-                proc.destroy();
-            };
-        } catch (Exception e) {
-            println "An error occurred during an attempt to find a started simulator: ${e.message}";
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        
-        if(!foundSimulator) {
-            println "Error: The simulator was not found. Please check the system.";
-            System.exit(-1);
-        }
-        
-        println "The simulator UI is ready.";
-    }
-    
-    /**
-    * Starts the simulator.
-    * simType: The simulator configuration type to start.
-    * targetOS: The OS of the simulator to start (without architecture option e.g 7.0).
-    * xcode: The path to Xcode used for starting the simulator.
-    **/
-    public static void startSimulator(def simType, def targetOS, def xcode) {
-        // Update the device type and target SDK OS before launching the simulator.
-        if(simType?.trim() && targetOS?.trim()) {
-            def xcodeApp = Util.verifyXcodePath(xcode);
-            
-            try {
-                def pathToXcode = new String(File.separator + "Contents" + File.separator + 
-                    "Developer" + File.separator + "Platforms" + File.separator + 
-                    "iPhoneSimulator.platform" + File.separator + "Developer" + File.separator + 
-                    "SDKs" + File.separator + "iPhoneSimulator" + targetOS + ".sdk");
-                xcodeApp = new File(xcodeApp, pathToXcode);
-            } catch (Exception e) {
-                println "An error occurred during an attempt to access the simulator " + 
-                    "target OS: " + e.getMessage();
-                System.exit(-1);
-            }
-            if(!xcodeApp.directory) {
-                println "Error: The path to the simulator target OS is incorrect: " + 
-                    xcodeApp.canonicalPath;
-                println "Possibly the simulator SDK is not installed.";
-                System.exit(-1);
-            }
-            
-            // The script file is located in the plug-in.
-            final def PLUGIN_HOME = new File(System.getenv().get("PLUGIN_HOME"));
-            def scriptLoc = PLUGIN_HOME.canonicalPath + File.separator + 'configSimulator.scpt';
-            
-            // Run the script to change the simulator configuration.
-            def simCH = new CommandHelper(new File('.'));
-            def simArgs = ['osascript', scriptLoc, simType, xcodeApp.canonicalPath];
-            
-            simCH.runCommand("Updating the simulator configuration.", simArgs);
-            
-            def plistLoc = System.getenv().get("HOME") + File.separator + "Library" +
-                File.separator + "Preferences" + File.separator + "com.apple.iphonesimulator";
-            simArgs = ['defaults', 'read', plistLoc];
-            simCH.runCommand("Refreshing the simulator configuration.", simArgs);
-             
-            println "The simulator will launch an ${simType} using SDK ${targetOS}.";
-        } else {
-            if((simType && !targetOS ) || (!simType && targetOS)) {
-                println "Error: Both the Simulator Type and Target OS must be specified when changing " +
-                    "the simulator configuration.";
-                System.exit(-1);
-            }
-        } 
-        
-        // Start the simulator.
-        def ch = new CommandHelper(new File('.'));
-        def args = ['osascript', '-e', 'tell application \"iPhone Simulator\" to launch'];
-        
-        ch.runCommand("Starting the simulator.", args);
-    }
+     * Starts the simulator.
+     * udid: The unique device identifier of the simulator to check.
+     **/
+     public static void startSimulator(def udid) {
+         // Update the device type and target SDK OS before launching the simulator.
+         if(udid?.trim()) {
+             def simCH = new CommandHelper(new File('.'));
+             def simArgs = ['defaults', 'write', 'com.apple.iphonesimulator', 'CurrentDeviceUDID', udid];
+             simCH.runCommand("Refreshing the simulator configuration.", simArgs);              
+             println "The simulator with UDID ${udid} will be launched.";
+         } else {
+             println "Error: The simulator UDID must be specified when changing " +
+                 "the simulator configuration.";
+             System.exit(-1);
+         }
+         
+         // Start the simulator.
+         def ch = new CommandHelper(new File('.'));
+         def args = ['osascript', '-e', 'tell application \"iOS Simulator\" to launch'];
+         
+         ch.runCommand("Starting the simulator.", args);
+     }
     
     /**
     * Stops the running simulator.
     **/
     public static void stopSimulator() {
         def ch = new CommandHelper(new File('.'));
-        def args = ['osascript', '-e', 'tell application \"iPhone Simulator\" to quit'];
+        def args = ['osascript', '-e', 'tell application \"iOS Simulator\" to quit'];
 
         ch.runCommand("Stopping the simulator.", args);
     }
