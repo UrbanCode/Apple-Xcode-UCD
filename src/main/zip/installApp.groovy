@@ -15,7 +15,8 @@ final def props = apTool.getStepProperties();
 
 def app = props['app']
 def udid = props['udid']
-def simType = props['simType']
+def simName = props['simName']
+def simDeviceType = props['simDeviceType']?: ""
 def targetOS = props['targetOS']
 boolean reinstall = Boolean.parseBoolean(props['reinstall'])
 def xcrunPath = props['xcrunPath']
@@ -55,12 +56,12 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if((simType && !targetOS ) || (!simType && targetOS)) {
-        println "Error: Both the Simulator Type and Target OS must be specified " +
-                    "for application install.";
+    if((simName && !targetOS ) || (!simName && targetOS)) {
+        println "Error: Both the Simulator Name and Target OS must be specified " + 
+            "for application install.";
         System.exit(-1);
     }
-    def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    def simUDID = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
     Util.isAppValidForSimArch(simUDID, appFile);
     
     // If we are reinstalling, we don't need to check if the app is installed

@@ -15,7 +15,8 @@ final def props = apTool.getStepProperties();
 
 def bundleID = props['bundleID']
 def udid = props['udid']
-def simType = props['simType']
+def simName = props['simName']
+def simDeviceType = props['simDeviceType']?: ""
 def targetOS = props['targetOS']
 def xcrunPath = props['xcrunPath']
 def timeout = props['timeout']?: "300000"
@@ -32,12 +33,12 @@ if (udid) {
         System.exit(-1);
     }
 } else {
-    if((simType && !targetOS ) || (!simType && targetOS)) {
-        println "Error: Both the Simulator Type and Target OS must be specified " +
-                    "for application removal.";
+    if((simName && !targetOS ) || (!simName && targetOS)) {
+        println "Error: Both the Simulator Name and Target OS must be specified " +
+        "for application removal.";
         System.exit(-1);
     }
-    def simUDID = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    def simUDID = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
     Util.removeSimulatorApp(bundleID, simUDID, xcrunPath);
 }
 

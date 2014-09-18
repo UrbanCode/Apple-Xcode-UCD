@@ -18,7 +18,8 @@ def workspace = props['workspace']
 def scheme = props['scheme']
 def destination = props['destination']
 def udid = props['udid']
-def simType = props['simType']
+def simName = props['simName']
+def simDeviceType = props['simDeviceType']?: ""
 def targetOS = props['targetOS']?: ""
 def destinationTimeout = props['destinationTimeout']
 def xcrunPath = props['xcrunPath']
@@ -97,15 +98,15 @@ if(destination) {
     args << "-destination";
     args << "platform=iOS,id=" + udid.trim();
 } else {
-    // Check if only the simulator type is set.
-    if(!simType) {
-        println "Error: The Simulator Type must be specified when " +
+    // Check if only the simulator name is set.
+    if(!simName) {
+        println "Error: The Simulator Name must be specified when " +
             "specifying the simulator target to unit test against.";
         System.exit(-1);
     }
     
     args << "-destination";
-    udid = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
     // Build up the String for the target.
     args << "platform=iOS Simulator,id=" + udid;
 }

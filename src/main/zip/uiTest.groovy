@@ -18,7 +18,8 @@ def app = props['app']
 def script = props['script']
 def outputDir = props['outputDir']?: "."
 def udid = props['udid']
-def simType = props['simType']
+def simName = props['simName']
+def simDeviceType = props['simDeviceType']?: ""
 def targetOS = props['targetOS']
 def xcode = props['xcode']?: "/Applications/Xcode.app"
 def traceTemplate = props['traceTemplate']
@@ -35,15 +36,15 @@ if(udid) {
     Util.isUDIDValid(xcrunPath, udid);
 } else {
     // Check if only one of the simulator target properties are set.
-    if((simType && !targetOS ) || (!simType && targetOS)) {
-        println "Error: Both the Simulator Type and Target OS must be specified when " +
-            "specifying the simulator target to UI test against.";
+    if((simName && !targetOS ) || (!simName && targetOS)) {
+        println "Error: Both the Simulator Name and Target OS must be specified when " +
+        "specifying the simulator target to UI test against.";
         System.exit(-1);
     }
-    if(simType && targetOS) {
-        udid = Util.findSimulatorUDID(simType, targetOS, xcrunPath);
+    if(simName && targetOS) {
+        udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
         Util.isAppValidForSimArch(udid, appFile);
-    }
+    }    
 }
 
 // Build up the String for the target using the UDID of the device or simulator,

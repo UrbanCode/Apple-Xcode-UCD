@@ -42,12 +42,20 @@
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="simType">
+      <property name="simName">
         <property-ui type="textBox"
-                     label="Simulator Type"
-                     description="The simulator device type, for example, iPhone or 
-                        iPhone Retina (4-inch 64-bit)."
-                     default-value="${p?:resource/simulatorType}"/>
+                     label="Simulator Name"
+                     description="The name of the simulator to use, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
@@ -143,12 +151,20 @@
                         specified, then the Target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="simType">
+      <property name="simName">
         <property-ui type="textBox"
-                     label="Simulator Type"
-                     description="The simulator device type, for example, iPhone or 
-                        iPhone Retina (4-inch 64-bit)."
-                     default-value="${p?:resource/simulatorType}"/>
+                     label="Simulator Name"
+                     description="The name of the simulator to use, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
@@ -232,12 +248,20 @@
                         value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="simType">
+      <property name="simName">
         <property-ui type="textBox"
-                     label="Simulator Type"
-                     description="The simulator device type, for example, iPhone or 
-                        iPhone Retina (4-inch 64-bit)."
-                     default-value="${p?:resource/simulatorType}"/>
+                     label="Simulator Name"
+                     description="The name of the simulator to use, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
@@ -363,12 +387,20 @@
                         specified, then the target OS value is ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="simType">
+      <property name="simName">
         <property-ui type="textBox"
-                     label="Simulator Type"
-                     description="The simulator device type, for example, iPhone or 
-                        iPhone Retina (4-inch 64-bit)."
-                     default-value="${p?:resource/simulatorType}"/>
+                     label="Simulator Name"
+                     description="The name of the simulator to use, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"
@@ -469,18 +501,129 @@
   </step-type>
   
   <!-- Simulator based steps -->
+  
+  <step-type name="Create Simulator">
+    <description>
+        Creates a simulator.
+    </description>
+    <properties>
+      <property name="simName" required="true">
+        <property-ui type="textBox"
+                     label="Simulator Name"
+                     description="The name of the simulator to create, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType" required="true">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, iPhone 6 Plus or Resizable iPad."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
+      </property>
+      <property name="targetOS" required="true">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS, for example, 7.1 or 8.0."
+                     default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path to xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="createSimulator.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
+  
+  <step-type name="Delete Simulator">
+    <description>
+        Deletes a simulator.
+    </description>
+    <properties>
+      <property name="simName" required="true">
+        <property-ui type="textBox"
+                     label="Simulator Name"
+                     description="The name of the simulator to delete, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
+      </property>
+      <property name="targetOS">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS, for example, 7.1 or 8.0."
+                     default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="xcrunPath">
+        <property-ui type="textBox"
+                     label="Path to xcrun"
+                     description="The path to the xcrun tool. If the 
+                        value is not specified, the value from the
+                        system path is used."
+                     default-value="${p?:resource/xcrunPath}"
+                     hidden="true"/>
+      </property>
+    </properties>
+    <post-processing><![CDATA[
+        if (properties.get("exitCode") != 0) {
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
+        }
+        else {
+            properties.put("Status", "Success");
+        }
+     ]]></post-processing>
+    <command program="${GROOVY_HOME}/bin/groovy">
+      <arg value="-cp"/>
+      <arg path="classes"/>
+      <arg file="deleteSimulator.groovy"/>
+      <arg file="${PLUGIN_INPUT_PROPS}"/>
+      <arg file="${PLUGIN_OUTPUT_PROPS}"/>
+    </command>
+  </step-type>
 
   <step-type name="Start Simulator">
     <description>
         Starts a simulator. The step fails if a simulator is already running.
     </description>
     <properties>
-      <property name="simType">
+      <property name="simName">
         <property-ui type="textBox"
-                     label="Simulator Type"
-                     description="The simulator device type, for example, iPhone or 
-                        iPhone Retina (4-inch 64-bit)."
-                     default-value="${p?:resource/simulatorType}"/>
+                     label="Simulator Name"
+                     description="The name of the simulator to use, for example, myIphone."
+                     default-value="${p?:resource/simulatorName}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="he name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS">
         <property-ui type="textBox"

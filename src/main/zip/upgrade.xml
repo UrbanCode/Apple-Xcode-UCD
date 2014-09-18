@@ -14,22 +14,45 @@
   <migrate to-version="2">
     <migrate-command name="Install Application">
       <migrate-properties>
-        <migrate-property name="simType" default="${p?:resource/simulatorType}" />
+        <migrate-property name="simName" default="${p?:resource/simulatorName}" />
+        <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
         <migrate-property name="targetOS" default="${p?:resource/simulatorOS}" />
       </migrate-properties>
     </migrate-command>
     
     <migrate-command name="Remove Application">
       <migrate-properties>
-        <migrate-property name="simType" default="${p?:resource/simulatorType}" />
+        <migrate-property name="simName" default="${p?:resource/simulatorName}" />
+        <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
         <migrate-property name="targetOS" default="${p?:resource/simulatorOS}" />
       </migrate-properties>
     </migrate-command>
     
-    <migrate-command name="UI Test" />
-    <migrate-command name="Unit Test" />
+    <migrate-command name="UI Test">
+      <migrate-properties>
+        <migrate-property name="simName" default="${p?:resource/simulatorName}" />
+        <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
+      </migrate-properties>
+    </migrate-command>
+    
+    <migrate-command name="Unit Test">
+      <migrate-properties>
+        <migrate-property name="simName" default="${p?:resource/simulatorName}" />
+        <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
+      </migrate-properties>
+    </migrate-command>
+    
     <migrate-command name="xcrun" />
-    <migrate-command name="Start Simulator" />
+    
+    <migrate-command name="Create Simulator" />
+    <migrate-command name="Delete Simulator" />
+    <migrate-command name="Start Simulator">
+      <migrate-properties>
+        <migrate-property name="simName" default="${p?:resource/simulatorName}" />
+        <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
+      </migrate-properties>
+    </migrate-command>
+        
     <migrate-command name="Stop Simulator" />
   </migrate>
   

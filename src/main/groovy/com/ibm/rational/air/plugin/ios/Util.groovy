@@ -19,8 +19,10 @@ public class Util {
     /**
     * Util Standard Variables' Names:
     * targetOS: The OS of the simulator without architecture option (e.g: 7.0).
-    * targetOSWithVersion: The OS of the simulator with version without architecture option (e.g: 7.0.3).
-    * simType: The simulator type (e.g: 'iPhone Retina (4-inch 64-bit)', 'iPhone Retina (4-inch)').
+    * simName: The simulator name (e.g: 'iPhone 5s', 'myIphone').
+    * simDeviceType: The simulator device type can be found in
+    *   ~/Library/Developer/CoreSimulator/Devices/<device ID>/device.plist.
+    *  (e.g: com.apple.CoreSimulator.SimDeviceType.iPhone-5s).
     ** /
 
     /**
@@ -69,7 +71,7 @@ public class Util {
                 println "Error: The simulator with UDID " + udid + " could not be found.";
                 println "Explanation: This error can occur if the simulator configuration" +
                     "does not exist.";
-                println "User response: Verify the simulator type and target OS are " +
+                println "User response: Verify the simulator name and target OS are " +
                     "correct for the UDID, and the simulator exists.";
                 System.exit(-1);
             }
@@ -297,6 +299,50 @@ public class Util {
         def args = ['osascript', '-e', 'tell application \"iOS Simulator\" to quit'];
 
         ch.runCommand("Stopping the simulator.", args);
+    }
+    
+    /**
+     * Create a simulator.
+     * simName: The name of the simulator configuration to create.
+     * simDeviceType: The simulator device type (e.g: iPhone 5s).
+     * targetOS: The OS of the simulator without architecture option (e.g: 7.0).
+     * xcrunPath: An optional path to the xcrun tool.
+     **/
+    public static void createSimulator (def simName, def simDeviceType, def targetOS, def xcrunPath) {
+        targetOS = targetOS.replaceFirst(/\./, '-');
+        targetOS = targetOS.split("\\.")[0];
+        targetOS = "com.apple.CoreSimulator.SimRuntime.iOS-"+targetOS;
+        
+        def args = ['simctl', 'create', simName, simDeviceType, targetOS];
+        int result = runXcrunCmd("Creating the simulator.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
+    }
+
+    /**
+     * Delete a simulator.
+     * udid: The unique device identifier of the simulator to delete.
+     * xcrunPath: An optional path to the xcrun tool.
+     **/
+    public static void deleteSimulator (def udid, def xcrunPath) {
+        def args = ['simctl', 'delete', udid];
+        int result = runXcrunCmd("Deleting the simulator.", args, xcrunPath,
+            null) { builder ->
+            def log = builder.toString();
+            // Output the log to the console.
+            println log;
+        }
+        if(result != 0) {
+            println "Error: Running the Xcrun command failed with error code: " + result;
+            System.exit(-1);
+        }
     }
     
     /**
@@ -781,8 +827,21 @@ public class Util {
         }
         
         if(simDir == null || !simDir.isDirectory()) {
-            println "The simulator application directory was not found.";
-            return false;
+            //iOS 8 application location
+            try {
+                simDir = getSimulatorPath(udid);
+                simDir = new File(simDir, "data" + File.separator + "Containers" + 
+                    File.separator + "Data" + File.separator + "Application");
+            } catch (Exception e) {
+                println "An error occurred during an attempt to access the simulator " +
+                        "application directory: " + e.getMessage();
+                System.exit(-1);
+            }
+
+            if(simDir == null || !simDir.isDirectory()){
+                println "The simulator application directory was not found.";
+                return false;
+            }
         }
         
         def appFound = false;
@@ -811,15 +870,17 @@ public class Util {
     
     /**
     * Determines the UDID of the simulator.
-    * simType: The simulator configuration type to check.
+    * simName: The simulator configuration name to check.
+    * simDeviceType: The simulator device type (e.g: iPhone 5s).
     * targetOS: The OS of the simulator to find the target OS with version. If the
     *   version is an empty String, the latest version is returned. This is used
     *   in the Unit test scenario.
     * xcrunPath: An optional path to the xcrun tool.
     * Returns UDID of the specified simulator.
     **/
-    public static String findSimulatorUDID(def simType, def targetOS, def xcrunPath) {
+    public static String findSimulatorUDID(def simName, def simDeviceType, def targetOS, def xcrunPath) {
         def udid;
+        boolean findSimDeviceType = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
         def args = ['instruments', '-s', 'devices'];
@@ -829,7 +890,7 @@ public class Util {
             // Output the log to the console.
             println log;
             /*
-            * Determine if the simulator type is in the list. The simulator entry 
+            * Determine if the simulator name is in the list. The simulator entry 
             * starts at the beginning of the line with the name, and is followed by 
             * the target OS version, including the maintenance version. It is possible
             * that the name could include characters that need to be escaped, so we 
@@ -843,21 +904,85 @@ public class Util {
             if(targetOS.length() == 0) {
                 // The entries should be sorted, so we take the last one with the
                 // corresponding simulator name.
-                def entries = log.findAll(/\Q${simType.trim()}\E\s\(\d\.\d(\.\d)?\sSimulator\).*/);
+                def entries = log.findAll(/\Q${simName.trim()}\E\s\(\d\.\d(\.\d)?\sSimulator\).*/);
                 log = entries.get(entries.size()-1);
-            } else {
-                log = log.find(/\Q${simType.trim()}\E\s\(\Q${targetOS.trim()}\E(\.\d)?\sSimulator\).*/);
+            } else {             
+                log = log.findAll(/\Q${simName.trim()}\E\s\(\Q${targetOS.trim()}\E(\.\d)?\sSimulator\).*/);
+                
+                if (log.size() > 1) {
+                    if(simDeviceType.length() == 0){
+                        println "There are more than one simulators with the same target OS were found, " +
+                        "please provid a simulator device type.";
+                        System.exit(-1);
+                    } else {       
+                        for (int i = 0; i < log.size(); i ++){
+                            def udidTmp = log.get(i).split("\\[")[1];
+                            udidTmp = udidTmp.split("\\]")[0];
+                            
+                            // Determine the simulator device type.
+                            def deviceInfo = getSimulatorPath(udidTmp);
+                            try {
+                                deviceInfo = new File(deviceInfo, "device.plist");
+                            } catch (Exception e) {
+                                println "An error occurred during an attempt to access the simulator device " +
+                                    "plist file: " + e.getMessage();
+                                System.exit(-1);
+                            }
+                            
+                            if (deviceInfo == null || !deviceInfo.file){
+                                println "Error: Not able to find the simulator device plist file: " +
+                                        deviceInfo.canonicalPath;
+                                System.exit(-1);
+                            }
+                            def deviceType;
+                            args = ['defaults', 'read', deviceInfo, 'deviceType'];
+                            ch.runCommand("Check simulator device type.", args) { proc ->
+                                InputStream inStream =  proc.getInputStream();
+                                List lines = inStream.readLines();
+                                if(lines.size == 0) {
+                                    println "The simulator device type was not found.";
+                                    System.exit(-1);
+                                }
+                                //The first line is the device type (ignore the new line).
+                                deviceType = lines.get(0);
+                            }
+                            println "The simulator device type to check: " + deviceType;
+                            
+                            //compare the simulator device type with user input.
+                            def sdt = simDeviceType.replaceAll(' ', '-');
+                            sdt = "com.apple.CoreSimulator.SimDeviceType."+sdt;
+                            if (deviceType == sdt){
+                                log = log.get(i);
+                                findSimDeviceType = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(!findSimDeviceType) {
+                        println "Error: The simulator with simulator name " + simName + 
+                            ", target OS " + targetOS + " and simulator device type " +
+                            simDeviceType + " could not be found.";
+                        println "Explanation: This error can occur if simulator device type " +
+                            "is incorrect.";
+                        println "User response: Verify the simulator device type " +
+                            "is correct.";
+                        System.exit(-1);
+                    }                    
+                } else if (log.size() == 1){
+                    log = log.get(0);
+                }
             }
+            
             if(log == null) {
-                println "Error: The simulator with simulator type " + simType + 
+                println "Error: The simulator with simulator name " + simName + 
                     " and target OS " + targetOS + " could not be found.";
-                println "Explanation: This error can occur if the simulator type or " +
+                println "Explanation: This error can occur if the simulator name or " +
                     "target OS are incorrect.";
-                println "User response: Verify the simulator type and target OS are " +
-                    "correct.";
+                println "User response: Verify the simulator name and " +
+                    "target OS are correct.";
                 System.exit(-1);
             }
-            // Pull out the UDID from the list.
+
             udid = log.split("\\[")[1];
             udid = udid.split("\\]")[0];
             println "The simulator UDID is: " + udid;
@@ -868,7 +993,7 @@ public class Util {
         }
         return udid;
     }
-    
+
     /**
     * Finds the bundle ID of an application given the path to the .app.
     * pathToApp: The local path to the .app directory to get the bundle ID for.
