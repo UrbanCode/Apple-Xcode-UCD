@@ -48,20 +48,20 @@
                      description="The name of the simulator to use, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
@@ -157,20 +157,20 @@
                      description="The name of the simulator to use, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
@@ -254,20 +254,20 @@
                      description="The name of the simulator to use, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcode">
         <property-ui type="textBox"
@@ -393,15 +393,6 @@
                      description="The name of the simulator to use, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
@@ -409,6 +400,15 @@
                         Note: If no target OS is specified, the default most recent value 
                         is used."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="destinationTimeout">
         <property-ui type="textBox"
@@ -513,18 +513,18 @@
                      description="The name of the simulator to create, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
+      <property name="targetOS" required="true">
+        <property-ui type="textBox"
+                     label="Target OS"
+                     description="The target OS, for example, 7.1 or 8.0."
+                     default-value="${p?:resource/simulatorOS}"/>
+      </property>
       <property name="simDeviceType" required="true">
         <property-ui type="textBox"
                      label="Simulator Device Type"
                      description="The name of the simulator device type. For example,
                         iPhone 6 Plus or Resizable iPad."
                      default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
-      <property name="targetOS" required="true">
-        <property-ui type="textBox"
-                     label="Target OS"
-                     description="The target OS, for example, 7.1 or 8.0."
-                     default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
@@ -564,20 +564,20 @@
                      description="The name of the simulator to delete, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 7.1 or 8.0."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
@@ -617,20 +617,20 @@
                      description="The name of the simulator to use, for example, myIphone."
                      default-value="${p?:resource/simulatorName}"/>
       </property>
-      <property name="simDeviceType">
-        <property-ui type="textBox"
-                     label="Simulator Device Type"
-                     description="he name of the simulator device type. For example, 
-                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
-                        name and same target OS."
-                     default-value="${p?:resource/simulatorDeviceType}"/>
-      </property>
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 6.1 or 7.1."
                      default-value="${p?:resource/simulatorOS}"/>
+      </property>
+      <property name="simDeviceType">
+        <property-ui type="textBox"
+                     label="Simulator Device Type"
+                     description="The name of the simulator device type. For example, 
+                        iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
+                        It's used in the case of more than one simulators have the same 
+                        name and same target OS."
+                     default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
