@@ -819,22 +819,23 @@ public class Util {
     public static boolean findSimulatorApp(def bundleID, def udid) {
         def simDir = getSimulatorPath(udid);
         try {
+            //in iOS 7, apps are installed under Applications in the data dir
             simDir = new File(simDir, "data" + File.separator + "Applications");
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator " + 
-                    "application directory: " + e.getMessage();
+                "application directory: " + e.getMessage();
             System.exit(-1);
         }
         
         if(simDir == null || !simDir.isDirectory()) {
-            //iOS 8 application location
             try {
+                //in iOS 8, apps are installed under Application in the Bundle dir
                 simDir = getSimulatorPath(udid);
                 simDir = new File(simDir, "data" + File.separator + "Containers" + 
-                    File.separator + "Data" + File.separator + "Application");
+                    File.separator + "Bundle" + File.separator + "Application");
             } catch (Exception e) {
                 println "An error occurred during an attempt to access the simulator " +
-                        "application directory: " + e.getMessage();
+                    "bundle application directory: " + e.getMessage();
                 System.exit(-1);
             }
 
@@ -912,9 +913,9 @@ public class Util {
                 if (log.size() > 1) {
                     if(simDeviceType.length() == 0){
                         println "There are more than one simulators with the same target OS were found, " +
-                        "please provid a simulator device type.";
+                            "please provide a simulator device type.";
                         System.exit(-1);
-                    } else {       
+                    } else {
                         for (int i = 0; i < log.size(); i ++){
                             def udidTmp = log.get(i).split("\\[")[1];
                             udidTmp = udidTmp.split("\\]")[0];
@@ -967,7 +968,7 @@ public class Util {
                         println "User response: Verify the simulator device type " +
                             "is correct.";
                         System.exit(-1);
-                    }                    
+                    }
                 } else if (log.size() == 1){
                     log = log.get(0);
                 }

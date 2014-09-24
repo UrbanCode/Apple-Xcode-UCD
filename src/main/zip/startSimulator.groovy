@@ -33,7 +33,7 @@ if(Util.isSimulatorRunning()) {
 
 if((simName && !targetOS ) || (!simName && targetOS)) {
     println "Error: Both the Simulator Name and Target OS must be specified " +
-    "for application start.";
+        "for application start.";
     System.exit(-1);
 }
 def simUDID = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);

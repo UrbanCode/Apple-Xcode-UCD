@@ -516,7 +516,8 @@
       <property name="simDeviceType" required="true">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, iPhone 6 Plus or Resizable iPad."
+                     description="The name of the simulator device type. For example,
+                        iPhone 6 Plus or Resizable iPad."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="targetOS" required="true">

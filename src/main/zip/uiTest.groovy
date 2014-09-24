@@ -44,7 +44,7 @@ if(udid) {
     if(simName && targetOS) {
         udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
         Util.isAppValidForSimArch(udid, appFile);
-    }    
+    }
 }
 
 // Build up the String for the target using the UDID of the device or simulator,
