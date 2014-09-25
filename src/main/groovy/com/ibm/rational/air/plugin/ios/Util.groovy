@@ -105,7 +105,7 @@ public class Util {
                 println "Error: The " + udid + " device identifier could not be found.";
                 println "Explanation: This error can occur if the device identifier is " +
                     "incorrect or the device is not attached.";
-                println "User response: Verify the device identifier is correct and " +
+                println "User response: Verify the device identifier is correct or " +
                     "the device is attached to the agent computer.";
                 System.exit(-1);
             }
@@ -115,6 +115,20 @@ public class Util {
             System.exit(-1);
         }
     }
+    
+    /**
+     * Checks if the provided unique device identifier, UDID, is a simulator UDID.
+     *  (i.e. simulator UDID: A7EB92CD-B5EB-4E48-82CD-FC586D0BC054, 
+     *           devide UDID: 6b86102bd854af7e8b82c76bffa46392feb1995a).
+     * udid: The unique device identifier.
+     **/
+     public static boolean isSimUDID(def udid) {
+         if (udid.size()==36){
+             return true;
+         } else {
+             return false;
+         }
+     }
         
     /**
     * Checks if the provided application is valid for the device platform.
@@ -881,13 +895,13 @@ public class Util {
     **/
     public static String findSimulatorUDID(def simName, def simDeviceType, def targetOS, def xcrunPath) {
         def udid;
-        boolean findSimDeviceType = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
         def args = ['instruments', '-s', 'devices'];
         int result = runXcrunCmd("Finding the simulator UDID.", args, xcrunPath,
             null) { builder ->
             def log = builder.toString();
+            boolean findSimDeviceType = false;
             // Output the log to the console.
             println log;
             /*
@@ -916,6 +930,8 @@ public class Util {
                             "please provide a simulator device type.";
                         System.exit(-1);
                     } else {
+                        int simCounter = 0;
+                        def logtmp;
                         for (int i = 0; i < log.size(); i ++){
                             def udidTmp = log.get(i).split("\\[")[1];
                             udidTmp = udidTmp.split("\\]")[0];
@@ -953,12 +969,23 @@ public class Util {
                             def sdt = simDeviceType.replaceAll(' ', '-');
                             sdt = "com.apple.CoreSimulator.SimDeviceType."+sdt;
                             if (deviceType == sdt){
-                                log = log.get(i);
+                                simCounter++;
+                                if (simCounter > 1){
+                                    println "Error: " + simCounter + " simulators with " +
+                                        "simulator name " + simName + ", target OS " + 
+                                        targetOS + " and simulator device type " +
+                                        simDeviceType + " were found.";
+                                    println "Please use simulator unique device identifier" +
+                                        "(UDID) instead.";
+                                    System.exit(-1);
+                                }
+                                logtmp = log.get(i);
                                 findSimDeviceType = true;
-                                break;
                             }
                         }
+                        log = logtmp;
                     }
+                    
                     if(!findSimDeviceType) {
                         println "Error: The simulator with simulator name " + simName + 
                             ", target OS " + targetOS + " and simulator device type " +

@@ -96,7 +96,12 @@ if(destination) {
 } else if (udid) {
     Util.isUDIDValid(xcrunPath, udid);
     args << "-destination";
-    args << "platform=iOS,id=" + udid.trim();
+
+    if(Util.isSimUDID(udid)){
+        args << "platform=iOS Simulator,id=" + udid.trim();
+    } else {
+        args << "platform=iOS,id=" + udid.trim();
+    }
 } else {
     // Check if only the simulator name is set.
     if(!simName) {

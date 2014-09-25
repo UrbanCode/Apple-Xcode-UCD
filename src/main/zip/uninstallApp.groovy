@@ -23,14 +23,17 @@ def timeout = props['timeout']?: "300000"
 
 Util.assertMacOS();
 
-// The target is a device.
 if (udid) {
     Util.isUDIDValid(xcrunPath, udid);
-    def result = Util.removeDeviceApp(bundleID, udid, null, timeout);
-    if(result != 0) {
-        println "Error: An error code of " + result + " occurred during " +
-            "application removal from the device."
-        System.exit(-1);
+    if(Util.isSimUDID(udid)){
+        Util.removeSimulatorApp(bundleID, udid, xcrunPath);
+    } else {
+        def result = Util.removeDeviceApp(bundleID, udid, null, timeout);
+        if(result != 0) {
+            println "Error: An error code of " + result + " occurred during " +
+                "application removal from the device."
+            System.exit(-1);
+        }
     }
 } else {
     if((simName && !targetOS ) || (!simName && targetOS)) {

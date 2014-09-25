@@ -38,8 +38,9 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the installation target. If the device identifier is 
-                        specified, then the Target OS value is ignored."
+                        or simulator that is the installation target. If the device 
+                        identifier is specified, then the Simulator Name and Target 
+                        OS values are ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -147,8 +148,9 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the removal target. If the device identifier is 
-                        specified, then the Target OS value is ignored."
+                        or simulator that is the removal target. If the device 
+                        identifier is specified, then the Simulator Name and Target OS 
+                        values are ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -242,10 +244,10 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical 
-                        device that is the test target. If you are testing on a 
-                        device, then you must first install the app. If the 
-                        device identifier is specified, then the Target OS 
-                        value is ignored."
+                        device or simulator that is the test target. If you 
+                        are testing on a device, then you must first install 
+                        the app. If the device identifier is specified, then 
+                        the Simulator Name and Target OS values are ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -383,8 +385,8 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        that is the test target. If the device identifier is 
-                        specified, then the target OS value is ignored."
+                        or simulator that is the test target. If the device identifier is 
+                        specified, then the Simulator Name and target OS values are ignored."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -558,6 +560,14 @@
         Deletes a simulator.
     </description>
     <properties>
+      <property name="udid">
+        <property-ui type="textBox"
+                     label="Device Identifier"
+                     description="The unique device identifier of simulator that is 
+                        the deletion target. If the device identifier is specified, 
+                        then the Simulator Name and target OS values are ignored."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
       <property name="simName" required="true">
         <property-ui type="textBox"
                      label="Simulator Name"
@@ -611,6 +621,14 @@
         Starts a simulator. The step fails if a simulator is already running.
     </description>
     <properties>
+       <property name="udid">
+         <property-ui type="textBox"
+                     label="Device Identifier"
+                     description="The unique device identifier of simulator that is 
+                        the starting target. If the device identifier is specified, 
+                        then the Simulator Name and target OS values are ignored."
+                     default-value="${p?:resource/deviceID}"/>
+      </property>
       <property name="simName">
         <property-ui type="textBox"
                      label="Simulator Name"

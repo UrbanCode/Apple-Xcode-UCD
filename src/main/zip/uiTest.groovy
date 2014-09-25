@@ -32,8 +32,12 @@ def args = ["instruments"];
 def appFile = Util.handleApplication(app);
 // Target the physical device, if one is specified.
 if(udid) {
-    Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
+    if (Util.isSimUDID(udid)){
+        Util.isAppValidForSimArch(udid, appFile);
+    } else {
+        Util.isAppValidForDeviceArch(appFile);
+    }
 } else {
     // Check if only one of the simulator target properties are set.
     if((simName && !targetOS ) || (!simName && targetOS)) {

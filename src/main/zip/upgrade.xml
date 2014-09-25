@@ -48,6 +48,7 @@
     <migrate-command name="Delete Simulator" />
     <migrate-command name="Start Simulator">
       <migrate-properties>
+         <migrate-property name="udid" default="${p?:resource/deviceID}" />
         <migrate-property name="simName" default="${p?:resource/simulatorName}" />
         <migrate-property name="simDeviceType" default="${p?:resource/simulatorDeviceType}" />
       </migrate-properties>

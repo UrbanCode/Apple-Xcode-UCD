@@ -36,24 +36,37 @@ if(!bundleID) {
     System.exit(-1);
 }
 
-// The target is a device.
 if (udid) {
-    Util.isAppValidForDeviceArch(appFile);
     Util.isUDIDValid(xcrunPath, udid);
-    // If we are reinstalling, we don't need to check if the app is installed
-    // since the application will be overwritten.
-    if(!reinstall) {
-        boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
-        if(isInstalled) {
-            println "Error: The application ${app} is already installed."
+    if(Util.isSimUDID(udid)){
+        Util.isAppValidForSimArch(udid, appFile);
+        // If we are reinstalling, we don't need to check if the app is installed
+        // since the application will be overwritten.
+        if(!reinstall) {
+            boolean isInstalled = Util.findSimulatorApp(bundleID, udid);
+            if(isInstalled) {
+                println "Error: The application ${app} is already installed."
+                System.exit(-1);
+            }
+        }
+        Util.installSimulatorApp(app, udid, xcrunPath);
+    } else {
+        Util.isAppValidForDeviceArch(appFile);
+        // If we are reinstalling, we don't need to check if the app is installed
+        // since the application will be overwritten.
+        if(!reinstall) {
+            boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
+            if(isInstalled) {
+                println "Error: The application ${app} is already installed."
+                System.exit(-1);
+            }
+        }
+        def result = Util.installDeviceApp(app, udid, null, timeout);
+        if(result != 0) {
+            println "Error: An error code of " + result + " occurred during " +
+                "installation on the device."
             System.exit(-1);
         }
-    }
-    def result = Util.installDeviceApp(app, udid, null, timeout);
-    if(result != 0) {
-        println "Error: An error code of " + result + " occurred during " +
-            "installation on the device."
-        System.exit(-1);
     }
 } else {
     if((simName && !targetOS ) || (!simName && targetOS)) {
