@@ -919,11 +919,14 @@ public class Util {
             if(targetOS.length() == 0) {
                 // The entries should be sorted, so we take the last one with the
                 // corresponding simulator name.
-                def entries = log.findAll(/\Q${simName.trim()}\E\s\(\d\.\d(\.\d)?\sSimulator\).*/);
-                log = entries.get(entries.size()-1);
+                log = log.findAll(/\Q${simName.trim()}\E\s\(\d\.\d(\.\d)?\sSimulator\).*/);
+                if (log.size() > 0){
+                    log = log.get(log.size()-1);
+                }
+
             } else {             
                 log = log.findAll(/\Q${simName.trim()}\E\s\(\Q${targetOS.trim()}\E(\.\d)?\sSimulator\).*/);
-                
+
                 if (log.size() > 1) {
                     if(simDeviceType.length() == 0){
                         println "There are more than one simulators with the same target OS were found, " +
@@ -1001,7 +1004,7 @@ public class Util {
                 }
             }
             
-            if(log == null) {
+            if(log == null || log.size() == 0) {
                 println "Error: The simulator with simulator name " + simName + 
                     " and target OS " + targetOS + " could not be found.";
                 println "Explanation: This error can occur if the simulator name or " +
