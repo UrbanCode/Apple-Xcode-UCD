@@ -32,13 +32,15 @@ if(project) {
     // The target is the project name, so find the project file.
     args << "-project";
     def xcodeproj;
+    def projFile = project + ".xcodeproj";
     def curDir = new File(".");
+    // The project name is the name of the .xcodeproj file.
     curDir.eachDir { it ->
-        if(it.name.endsWith(".xcodeproj")) {
+        if(it.name == projFile) {
             xcodeproj = it.canonicalPath;
         } else {
             it.eachDir { subDir ->
-                if(subDir.name.endsWith(".xcodeproj")) {
+                if(subDir.name == projFile) {
                     xcodeproj = subDir.canonicalPath;
                 }
             }
