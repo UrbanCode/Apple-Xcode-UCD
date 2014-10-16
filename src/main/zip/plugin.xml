@@ -650,6 +650,14 @@
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
+      <property name="xcode">
+        <property-ui type="textBox"
+                     label="Path to Xcode"
+                     description="The path to the Xcode installation. If no value is 
+                        specified, the default value /Applications/Xcode.app is used."
+                     default-value="${p?:resource/XcodePath}"
+                     hidden="true"/>
+      </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"

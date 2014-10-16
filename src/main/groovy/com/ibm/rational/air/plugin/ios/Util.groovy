@@ -284,8 +284,9 @@ public class Util {
     /**
      * Starts the simulator.
      * udid: The unique device identifier of the simulator to check.
+     * simulatorAppPath: The path to the iOS Simulator app.
      **/
-     public static void startSimulator(def udid) {
+     public static void startSimulator(def udid, def simulatorAppPath) {
          // Update the device type and target SDK OS before launching the simulator.
          if(udid?.trim()) {
              def simCH = new CommandHelper(new File('.'));
@@ -300,8 +301,7 @@ public class Util {
          
          // Start the simulator.
          def ch = new CommandHelper(new File('.'));
-         def args = ['osascript', '-e', 'tell application \"iOS Simulator\" to launch'];
-         
+         def args = ['open', simulatorAppPath];
          ch.runCommand("Starting the simulator.", args);
      }
     

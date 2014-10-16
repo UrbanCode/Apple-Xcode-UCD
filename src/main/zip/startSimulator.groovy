@@ -22,6 +22,7 @@ def udid = props['udid']
 def simName = props['simName']
 def simDeviceType = props['simDeviceType']?: ""
 def targetOS = props['targetOS']
+def xcode = props['xcode']?: "/Applications/Xcode.app"
 def xcrunPath = props['xcrunPath']
 int startupRetries = Integer.parseInt(props['startupRetries']?:"10")
 
@@ -48,7 +49,27 @@ if (udid) {
     udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
 }
 
-Util.startSimulator(udid);
+def xcodeApp = Util.verifyXcodePath(xcode);
+
+def simulatorApp = new String(File.separator + "Contents" + File.separator + "Developer" +
+    File.separator + "Applications" + File.separator +
+    "iOS Simulator.app");
+
+def simulatorAppPath;
+try {
+    simulatorAppPath = new File(xcodeApp, simulatorApp);
+} catch (Exception e) {
+    println "An error occurred during an attempt to access the iOS simulator " +
+        "app: " + e.getMessage();
+    System.exit(-1);
+}
+if(!simulatorAppPath.directory) {
+    println "Error: The path to the iOS simulator app is incorrect: " +
+        simulatorAppPath.canonicalPath;
+    System.exit(-1);
+}
+
+Util.startSimulator(udid, simulatorAppPath);
 
 for (int i = 0; i < startupRetries; i++){
     if(Util.isSimulatorRunning(udid, xcrunPath)) {
