@@ -44,10 +44,15 @@ if(udid) {
         println "Error: Both the Simulator Name and Target OS must be specified when " +
         "specifying the simulator target to UI test against.";
         System.exit(-1);
-    }
-    if(simName && targetOS) {
+    } else if(simName && targetOS) {
         udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
         Util.isAppValidForSimArch(udid, appFile);
+    } else {
+        println "Error: A test target must be provided.";
+        println "Explanation: This error can occur if no target is defined.";
+        println "User response: Verify the simulator name and target OS, or " +
+            "device identifier are defined for the UI Test step.";
+        System.exit(-1);
     }
 }
 
