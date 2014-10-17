@@ -196,28 +196,46 @@ public class Util {
         }
         
         def bundleName = null;
+        def simulatorSupported = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
-        appDir.eachFile { infoFile ->
-            if (infoFile.name == "Info.plist") {
-                def infoPath = appDir.canonicalPath + File.separator + 'info';
-                def args = ['defaults', 'read', infoPath, 'CFBundleName'];
-                ch.runCommand("Check bundle name.", args) { proc ->
-                    InputStream inStream =  proc.getInputStream();
-                    List lines = inStream.readLines();
-                    if(lines.size == 0) {
-                        println "The bundle name was not found.";
-                        System.exit(-1);
-                    }
-                    //The first line is the bundle name (ignore the new line).
-                    bundleName = lines.get(0);
+        def infoPath = appDir.canonicalPath + File.separator + 'info';
+        def args = ['defaults', 'read', infoPath, 'CFBundleName'];
+        ch.runCommand("Check bundle name.", args) { proc ->
+            InputStream inStream =  proc.getInputStream();
+            List lines = inStream.readLines();
+            if(lines.size == 0) {
+                println "The bundle name was not found.";
+                System.exit(-1);
+            }
+            //The first line is the bundle name (ignore the new line).
+            bundleName = lines.get(0);
+        }
+        // Check the platform name of the application to ensure it is 
+        // built to support the simulator.
+        args = ['defaults', 'read', infoPath, 'CFBundleSupportedPlatforms'];
+        ch.runCommand("Check supported platforms.", args) { proc ->
+            InputStream inStream =  proc.getInputStream();
+            inStream.eachLine { line ->
+                if (!simulatorSupported && line.trim() == "iPhoneSimulator") {
+                    simulatorSupported = true;
                 }
             }
         }
         
+        if(!simulatorSupported) {
+            println "Error: The simulator architecture does not support " +
+                "the application.";
+            println "Explanation: This error can occur if the application is " +
+                "not built for the iPhoneSimulator configuration.";
+            println "User response: Verify the application is built for " +
+                "the correct target, for example, iPhoneSimulator.";
+            System.exit(-1);
+        }
+        
         // Run the file command to check the architecture of the app.
         def arch = null;
-        def args = ['file', appDir.canonicalPath + File.separator + bundleName];
+        args = ['file', appDir.canonicalPath + File.separator + bundleName];
         ch.runCommand("Check app architecture.", args) { proc ->
             InputStream inStream =  proc.getInputStream();
             List lines = inStream.readLines();
