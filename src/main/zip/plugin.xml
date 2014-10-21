@@ -52,7 +52,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
@@ -162,7 +162,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
@@ -259,7 +259,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
@@ -398,7 +398,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 6.1 or 7.1.
+                     description="The target OS, for example, 7.1 or 8.1.
                         Note: If no target OS is specified, the default most recent value 
                         is used."
                      default-value="${p?:resource/simulatorOS}"/>
@@ -638,7 +638,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 6.1 or 7.1."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
