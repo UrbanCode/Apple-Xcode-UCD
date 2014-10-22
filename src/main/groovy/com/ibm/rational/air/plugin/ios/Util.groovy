@@ -850,20 +850,20 @@ public class Util {
     **/
     public static boolean findSimulatorApp(def bundleID, def udid) {
         def simDir = getSimulatorPath(udid);
+        def simDirPath;
         try {
             //in iOS 7, apps are installed under Applications in the data dir
-            simDir = new File(simDir, "data" + File.separator + "Applications");
+            simDirPath = new File(simDir, "data" + File.separator + "Applications");
         } catch (Exception e) {
             println "An error occurred during an attempt to access the simulator " + 
                 "application directory: " + e.getMessage();
             System.exit(-1);
         }
         
-        if(simDir == null || !simDir.isDirectory()) {
+        if(simDirPath == null || !simDirPath.isDirectory()) {
             try {
                 //in iOS 8, apps are installed under Application in the Bundle dir
-                simDir = getSimulatorPath(udid);
-                simDir = new File(simDir, "data" + File.separator + "Containers" + 
+                simDirPath = new File(simDir, "data" + File.separator + "Containers" + 
                     File.separator + "Bundle" + File.separator + "Application");
             } catch (Exception e) {
                 println "An error occurred during an attempt to access the simulator " +
@@ -871,7 +871,7 @@ public class Util {
                 System.exit(-1);
             }
 
-            if(simDir == null || !simDir.isDirectory()){
+            if(simDirPath == null || !simDirPath.isDirectory()){
                 println "The simulator application directory was not found.";
                 return false;
             }
@@ -880,7 +880,7 @@ public class Util {
         def appFound = false;
         def ch = new CommandHelper(new File('.'));
         ch.ignoreExitValue(true);
-        simDir.eachDir { uuidDir ->
+        simDirPath.eachDir { uuidDir ->
             uuidDir.eachDir { appDir ->
                 appDir.eachFile { infoFile ->
                     if (infoFile.name == "Info.plist") {
