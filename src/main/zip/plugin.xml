@@ -518,7 +518,7 @@
       <property name="targetOS" required="true">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 7.1 or 8.0."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType" required="true">
@@ -577,7 +577,7 @@
       <property name="targetOS">
         <property-ui type="textBox"
                      label="Target OS"
-                     description="The target OS, for example, 7.1 or 8.0."
+                     description="The target OS, for example, 7.1 or 8.1."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
