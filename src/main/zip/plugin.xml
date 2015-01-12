@@ -40,7 +40,8 @@
                      description="The unique device identifier of the physical device 
                         or simulator that is the installation target. If the device 
                         identifier is specified, then the Simulator Name and Target 
-                        OS values are ignored."
+                        OS values are ignored. If used with the Create Simulator step, 
+                        the ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -150,7 +151,8 @@
                      description="The unique device identifier of the physical device 
                         or simulator that is the removal target. If the device 
                         identifier is specified, then the Simulator Name and Target OS 
-                        values are ignored."
+                        values are ignored. If used with the Create Simulator step, the 
+                        ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -247,7 +249,9 @@
                         device or simulator that is the test target. If you 
                         are testing on a device, then you must first install 
                         the app. If the device identifier is specified, then 
-                        the Simulator Name and Target OS values are ignored."
+                        the Simulator Name and Target OS values are ignored.
+                        If used with the Create Simulator step, the 
+                        ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -386,7 +390,9 @@
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
                         or simulator that is the test target. If the device identifier is 
-                        specified, then the Simulator Name and target OS values are ignored."
+                        specified, then the Simulator Name and target OS values are ignored.
+                        If used with the Create Simulator step, the 
+                        ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -565,7 +571,9 @@
                      label="Device Identifier"
                      description="The unique device identifier of simulator that is 
                         the deletion target. If the device identifier is specified, 
-                        then the Simulator Name and target OS values are ignored."
+                        then the Simulator Name and target OS values are ignored. 
+                        If used with the Create Simulator step, the 
+                        ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName" required="true">
@@ -626,7 +634,9 @@
                      label="Device Identifier"
                      description="The unique device identifier of simulator that is 
                         the starting target. If the device identifier is specified, 
-                        then the Simulator Name and target OS values are ignored."
+                        then the Simulator Name and target OS values are ignored.
+                        If used with the Create Simulator step, the 
+                        ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">

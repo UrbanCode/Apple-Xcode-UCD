@@ -340,10 +340,11 @@ public class Util {
      * targetOS: The OS of the simulator without architecture option (e.g: 7.0).
      * xcrunPath: An optional path to the xcrun tool.
      **/
-    public static void createSimulator (def simName, def simDeviceType, def targetOS, def xcrunPath) {
+    public static String createSimulator (def simName, def simDeviceType, def targetOS, def xcrunPath) {
         targetOS = targetOS.replaceFirst(/\./, '-');
         targetOS = targetOS.split("\\.")[0];
         targetOS = "com.apple.CoreSimulator.SimRuntime.iOS-"+targetOS;
+        String udid = null;
         
         def args = ['simctl', 'create', simName, simDeviceType, targetOS];
         int result = runXcrunCmd("Creating the simulator.", args, xcrunPath,
@@ -351,11 +352,17 @@ public class Util {
             def log = builder.toString();
             // Output the log to the console.
             println log;
+            // Do a basic check to ensure the UDID has been returned.
+            if(log?.contains("-")) {
+            	udid = log.trim();
+            }
         }
         if(result != 0) {
             println "Error: Running the Xcrun command failed with error code: " + result;
             System.exit(-1);
         }
+        
+        return udid;
     }
 
     /**

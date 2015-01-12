@@ -20,7 +20,10 @@ def xcrunPath = props['xcrunPath']
 
 Util.assertMacOS();
 
-Util.createSimulator(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
+def udid = Util.createSimulator(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
+
+apTool.setOutputProperty("deviceID", udid);
+apTool.storeOutputProperties();
 
 println "The simulator was created.";
 System.exit(0);
