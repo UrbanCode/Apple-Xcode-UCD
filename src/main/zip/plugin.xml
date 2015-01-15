@@ -198,7 +198,7 @@
     </properties>
     <post-processing><![CDATA[
         if (properties.get("exitCode") != 0) {
-            properties.put(new java.lang.String("Status"), new java.lang.String("Error"));
+            properties.put(new java.lang.String("Status"), new java.lang.String("Failure"));
         }
         else {
             properties.put("Status", "Success");
