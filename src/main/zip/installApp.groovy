@@ -49,7 +49,7 @@ if (udid) {
                 System.exit(-1);
             }
         }
-        Util.installSimulatorApp(app, udid, xcrunPath);
+        Util.installSimulatorApp(appFile, udid, xcrunPath);
     } else {
         Util.isAppValidForDeviceArch(appFile);
         // If we are reinstalling, we don't need to check if the app is installed
@@ -61,7 +61,7 @@ if (udid) {
                 System.exit(-1);
             }
         }
-        def result = Util.installDeviceApp(app, udid, null, timeout);
+        def result = Util.installDeviceApp(appFile, udid, null, timeout);
         if(result != 0) {
             println "Error: An error code of " + result + " occurred during " +
                 "installation on the device."
@@ -86,7 +86,7 @@ if (udid) {
             System.exit(-1);
         }
     }
-    Util.installSimulatorApp(app, simUDID, xcrunPath);
+    Util.installSimulatorApp(appFile, simUDID, xcrunPath);
 }
 
 println "The Install Application step completed.";
