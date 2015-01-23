@@ -69,9 +69,12 @@ if (udid) {
         }
     }
 } else {
-    if((simName && !targetOS ) || (!simName && targetOS)) {
+    if(!(simName && targetOS)) {
         println "Error: Both the Simulator Name and Target OS must be specified " + 
             "for application install.";
+        println "Explanation: This error can occur if neither Simulator Name nor Target OS are defined.";
+        println "User response: Verify the Simulator Name and Target OS, or " +
+            "Device Identifier are defined for the Install Application step.";
         System.exit(-1);
     }
     def simUDID = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
