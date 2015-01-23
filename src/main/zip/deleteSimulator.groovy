@@ -29,6 +29,11 @@ if (udid) {
         System.exit(-1);
     }
 } else {
+    if((simName && !targetOS ) || (!simName && targetOS)){
+        println "Error: Both the Simulator Name and Target OS must be specified " +
+            "for simulator deletion.";
+        System.exit(-1);
+    }
     udid = Util.findSimulatorUDID(simName, simDeviceType.trim(), targetOS.trim(), xcrunPath);
 }
 

@@ -576,7 +576,7 @@
                         ${p?:Create Simulator/deviceID} property can be used."
                      default-value="${p?:resource/deviceID}"/>
       </property>
-      <property name="simName" required="true">
+      <property name="simName">
         <property-ui type="textBox"
                      label="Simulator Name"
                      description="The name of the simulator to delete, for example, myIphone."
