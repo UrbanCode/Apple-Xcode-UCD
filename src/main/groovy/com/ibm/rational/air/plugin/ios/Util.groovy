@@ -1,7 +1,7 @@
 /**
 * Licensed Materials - Property of IBM
 * 5748-XX8
-* (C) Copyright IBM Corp. 2014 All Rights Reserved
+* (C) Copyright IBM Corp. 2014, 2015. All Rights Reserved
 * US Government Users Restricted Rights - Use, duplication or
 * disclosure restricted by GSA ADP Schedule Contract with
 * IBM Corp.
