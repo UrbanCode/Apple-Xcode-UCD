@@ -43,9 +43,9 @@ if (udid) {
 } else {
     if(!(simName && targetOS)) {
         println "Error: Both the Simulator Name and Target OS must be specified " +
-            "for application start.";
+            "to start the application.";
         println "Explanation: This error can occur if neither Simulator Name nor Target OS are defined.";
-        println "User response: Verify the Simulator Name and Target OS, or " +
+        println "User response: Verify that the Simulator Name and Target OS, or " +
             "Device Identifier are defined for the Start Simulator step.";
         System.exit(-1);
     }

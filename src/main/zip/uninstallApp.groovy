@@ -48,5 +48,5 @@ if (udid) {
     Util.removeSimulatorApp(bundleID, simUDID, xcrunPath);
 }
 
-println "The Remove Application step completed.";
+println "The Remove Application step is complete.";
 System.exit(0);

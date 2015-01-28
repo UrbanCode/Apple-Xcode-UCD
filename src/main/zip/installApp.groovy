@@ -32,7 +32,7 @@ def appFile = Util.handleApplication(app);
 def bundleID = Util.getAppBundleID(appFile);
 if(!bundleID) {
     println "An error occurred while trying to find the application bundle ID in " + 
-        "order to determine if the application is installed.";
+        "order to determine whether the application is installed.";
     System.exit(-1);
 }
 
@@ -92,5 +92,5 @@ if (udid) {
     Util.installSimulatorApp(appFile, simUDID, xcrunPath);
 }
 
-println "The Install Application step completed.";
+println "The Install Application step is complete.";
 System.exit(0);

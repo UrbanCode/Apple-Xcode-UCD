@@ -31,8 +31,8 @@ public class Util {
     public static void assertMacOS() {
         def osName = System.getProperty("os.name").toLowerCase(Locale.US)
         if(!osName.contains("mac os")) {
-            println "The plug-in commands must be running on an agent installed on a " +
-                "Mac machine.";
+            println "The plug-in must be running on an agent that is " +
+                "installed on a Mac computer.";
             System.exit(-1);
         }
     }
@@ -68,18 +68,18 @@ public class Util {
             // Locate the simulator entry by udid.
             log = log.find(/.*\(${udid}\).*/);
             if(log == null) {
-                println "Error: The simulator with UDID " + udid + " could not be found.";
+                println "Error: The " + udid + " simulator could not be found.";
                 println "Explanation: This error can occur if the simulator configuration" +
                     "does not exist.";
-                println "User response: Verify the simulator name and target OS are " +
-                    "correct for the UDID, and the simulator exists.";
+                println "User response: Verify that the simulator name and target OS are " +
+                    "correct for the UDID and the simulator exists.";
                 System.exit(-1);
             }
             // Pull out the status from the entry.
             isStarted = log.contains("Booted");
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: Running the Xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
         return isStarted;
@@ -105,13 +105,13 @@ public class Util {
                 println "Error: The " + udid + " device identifier could not be found.";
                 println "Explanation: This error can occur if the device identifier is " +
                     "incorrect or the device is not attached.";
-                println "User response: Verify the device identifier is correct or " +
+                println "User response: Verify that the device identifier is correct or " +
                     "the device is attached to the agent computer.";
                 System.exit(-1);
             }
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: Running the Xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
     }
@@ -228,7 +228,7 @@ public class Util {
                 "the application.";
             println "Explanation: This error can occur if the application is " +
                 "not built for the iPhoneSimulator configuration.";
-            println "User response: Verify the application is built for " +
+            println "User response: Verify that the application is built for " +
                 "the correct target, for example, iPhoneSimulator.";
             System.exit(-1);
         }
@@ -258,7 +258,7 @@ public class Util {
         }
         
         if (deviceInfo == null || !deviceInfo.file){
-            println "Error: Not able to find the simulator device plist file: " + 
+            println "Error: The following simulator device plist file cannot be found: " + 
                     deviceInfo.canonicalPath;
             System.exit(-1);
         }
@@ -275,7 +275,7 @@ public class Util {
             simDeviceType = lines.get(0);
         }
         
-        println "The simulator device type to check: " + simDeviceType;
+        println "The simulator device type to check is as follows: " + simDeviceType;
         println "Output of the file command (Tip: The app architecture is typically " +
             "at the end and of the form i386 or x86_64): " + arch;
         /*
@@ -310,10 +310,10 @@ public class Util {
              def simCH = new CommandHelper(new File('.'));
              def simArgs = ['defaults', 'write', 'com.apple.iphonesimulator', 'CurrentDeviceUDID', udid];
              simCH.runCommand("Refreshing the simulator configuration.", simArgs);              
-             println "The simulator with UDID ${udid} will be launched.";
+             println "The ${udid} simulator will be launched.";
          } else {
-             println "Error: The simulator UDID must be specified when changing " +
-                 "the simulator configuration.";
+             println "Error: The simulator UDID must be specified when " +
+                 "the simulator configuration is changed.";
              System.exit(-1);
          }
          
@@ -358,7 +358,7 @@ public class Util {
             }
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The Xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
         
@@ -379,7 +379,7 @@ public class Util {
             println log;
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The Xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
     }
@@ -428,7 +428,7 @@ public class Util {
                         }
                     } catch (Exception e) {
                         println "An error occurred during an attempt to remove the existing " +
-                            "application directory in the working directory: " + e.getMessage();
+                            "application directory in this working directory: " + e.getMessage();
                         System.exit(-1);
                     }
                     args = ['mv', '-f', it.canonicalPath, curDir.canonicalPath];
@@ -443,7 +443,7 @@ public class Util {
         
         if(!app.name.endsWith(".app")) {
             println "Error: The ${app.name} application file name must exist and include " +
-                "either the ipa or app extension."
+                "either the .ipa or .app extension."
             System.exit(1)
         }
         
@@ -502,9 +502,9 @@ public class Util {
                 (new File(new File(outputDir), newFilename)).canonicalPath;
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The Xcrun command failed with this error code: " + result;
             if(timeout) {
-                println "The timeout may have been exceeded."
+                println "The timeout might have been exceeded."
             }
         }
         return result;
@@ -534,10 +534,10 @@ public class Util {
         }
         
         if(result != 0) {
-            println "Error: Running the unit test command failed with error " +
+            println "Error: The unit test command failed with this error " +
                 "code: ${result}"; 
             if(timeout) {
-                println "The timeout may have been exceeded."
+                println "The timeout might have been exceeded."
             }
         }
         return result;
@@ -561,12 +561,12 @@ public class Util {
             try {
                 xcrunCmd = new File(xcrunPath + File.separator + "xcrun");
             } catch (Exception e) {
-                println "An error occurred during an attempt to access the Xcrun Application: " +
+                println "An error occurred during an attempt to access the Xcrun application: " +
                     e.getMessage();
                 System.exit(-1);
             }
             if(!xcrunCmd.file) {
-                println "Error: The path to the Xcrun Application is incorrect: " + 
+                println "Error: The path to the Xcrun application is incorrect: " + 
                     xcrunCmd.canonicalPath;
                 System.exit(-1);
             }
@@ -595,12 +595,12 @@ public class Util {
         try {
             xcodeApp = new File(xcode);
         } catch (Exception e) {
-            println "An error occurred during an attempt to access the Xcode Application" +
+            println "An error occurred during an attempt to access the Xcode application " +
                 "directory: " + e.getMessage();
             System.exit(-1);
         }
         if(!xcodeApp.directory) {
-            println "Error: The path to the Xcode Application is incorrect: " + 
+            println "Error: The path to the Xcode application is incorrect: " + 
                 xcodeApp.canonicalPath;
             System.exit(-1);
         }
@@ -625,7 +625,7 @@ public class Util {
             name, timeout) { builder ->
             bundle = builder.toString();
             if(!bundle?.trim()) {
-                println "Error: Failed to find the bundle ID for the provided application.";
+                println "Error: The bundle ID for the provided application was not found.";
                 System.exit(-1);
             }
         }
@@ -654,10 +654,10 @@ public class Util {
             udid, name, timeout) { builder ->
             output = builder.toString();
             if("OK" != output?.trim()) {
-                println "Error: Failed to install the application on the device.";
+                println "Error: The application was not installed on the device.";
                 println "Explanation: This error can occur if the application is not " +
                     "built for the correct target.";
-                println "User response: Verify the application is built for the correct " +
+                println "User response: Verify that the application is built for the correct " +
                     "target (for example, iphoneos or iphonesimulator) and architecture " +
                     "(for example, 64-bit).";
                 System.exit(-1);
@@ -681,7 +681,7 @@ public class Util {
         def appToFind;
         if(isPkg) {
             if(!app?.trim()) {
-                println "Error: A package must be supplied for location on the device.";
+                println "Error: A package must be supplied for the location on the device.";
                 System.exit(-1);
             }
             appToFind = app.trim();
@@ -731,7 +731,7 @@ public class Util {
         }
         boolean isInstalled = Util.findDeviceApp(bundleID, true, udid, null, timeout);
         if(!isInstalled) {
-            println "Error: The application with bundle ID ${bundleID} is not installed.";
+            println "Error: The application with the following bundle ID is not installed: ${bundleID}.";
             System.exit(-1);
         }
         args << bundleID;
@@ -741,7 +741,7 @@ public class Util {
             udid, name, timeout) { builder ->
             output = builder.toString();
             if("OK" != output?.trim()) {
-                println "Error: Failed to remove the application from the device.";
+                println "Error: The application was not removed from the device.";
                 System.exit(-1);
             }
         }
@@ -757,13 +757,13 @@ public class Util {
     **/
     public static void removeSimulatorApp(def bundleID, def udid, def xcrunPath) { 
         if(!isSimulatorRunning(udid, xcrunPath)) {
-            println "Error: The simulator must be running when uninstalling an app " +
+            println "Error: The simulator must be running when an app is being uninstalled " +
                 "from the simulator.";
             System.exit(-1);
         }
         
         if(!findSimulatorApp(bundleID, udid)) {
-            println "Error: The application with bundle ID ${bundleID} is not installed.";
+            println "Error: The application with the following bundle ID is not installed: ${bundleID}.";
             System.exit(-1);
         }
         
@@ -776,7 +776,7 @@ public class Util {
             println log;
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The xcrun command failed with error code: " + result;
             System.exit(-1);
         }
     }
@@ -841,7 +841,7 @@ public class Util {
             
         }
         if(result != 0) {
-            println "Error: Running the device command failed with error code: " + result;
+            println "Error: The device command failed with this error code: " + result;
             if(timeout) {
                 println "The timeout may have been exceeded."
             }
@@ -954,8 +954,8 @@ public class Util {
 
                 if (log.size() > 1) {
                     if(simDeviceType.length() == 0){
-                        println "There are more than one simulators with the same target OS were found, " +
-                            "please provide a simulator device type.";
+                        println "More than one simulator with the same target OS were found. " +
+                            "Provide a simulator device type.";
                         System.exit(-1);
                     } else {
                         int simCounter = 0;
@@ -975,7 +975,7 @@ public class Util {
                             }
                             
                             if (deviceInfo == null || !deviceInfo.file){
-                                println "Error: Not able to find the simulator device plist file: " +
+                                println "Error: The simulator device plist file was not found: " +
                                         deviceInfo.canonicalPath;
                                 System.exit(-1);
                             }
@@ -991,7 +991,7 @@ public class Util {
                                 //The first line is the device type (ignore the new line).
                                 deviceType = lines.get(0);
                             }
-                            println "The simulator device type to check: " + deviceType;
+                            println "The simulator device type to check is as follows: " + deviceType;
                             
                             //compare the simulator device type with user input.
                             def sdt = simDeviceType.replaceAll(' ', '-');
@@ -1003,7 +1003,7 @@ public class Util {
                                         "simulator name " + simName + ", target OS " + 
                                         targetOS + " and simulator device type " +
                                         simDeviceType + " were found.";
-                                    println "Please use simulator unique device identifier" +
+                                    println "Use a unique simulator device identifier " +
                                         "(UDID) instead.";
                                     System.exit(-1);
                                 }
@@ -1018,9 +1018,9 @@ public class Util {
                         println "Error: The simulator with simulator name " + simName + 
                             ", target OS " + targetOS + " and simulator device type " +
                             simDeviceType + " could not be found.";
-                        println "Explanation: This error can occur if simulator device type " +
+                        println "Explanation: This error can occur if the simulator device type " +
                             "is incorrect.";
-                        println "User response: Verify the simulator device type " +
+                        println "User response: Verify that the simulator device type " +
                             "is correct.";
                         System.exit(-1);
                     }
@@ -1034,7 +1034,7 @@ public class Util {
                     " and target OS " + targetOS + " could not be found.";
                 println "Explanation: This error can occur if the simulator name or " +
                     "target OS are incorrect.";
-                println "User response: Verify the simulator name and " +
+                println "User response: Verify that the simulator name and " +
                     "target OS are correct.";
                 System.exit(-1);
             }
@@ -1044,7 +1044,7 @@ public class Util {
             println "The simulator UDID is: " + udid;
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
         return udid;
@@ -1061,7 +1061,7 @@ public class Util {
         try {
             appDir = new File(pathToApp);
         } catch (Exception e) {
-            println "An error occurred when attempting to get the application's " +
+            println "An error occurred during an attempt to get the application's " +
                 "bundle ID: " + e.getMessage();
             System.exit(-1);
         }
@@ -1080,7 +1080,7 @@ public class Util {
                     InputStream inStream =  proc.getInputStream();
                     List lines = inStream.readLines();
                     if(lines.size == 0) {
-                        println "An error occurred finding the bundle ID.";
+                        println "An error occurred in finding the bundle ID.";
                         System.exit(-1);
                     }
                     //The first line is the bundle ID (ignore the new line).
@@ -1109,11 +1109,11 @@ public class Util {
         }
         
         if (simDir == null || !simDir.isDirectory()) {
-            println "Error: Not able to find the simulator directory: " + 
+            println "Error: The simulator directory could not be found: " + 
                     simDir.canonicalPath;
             System.exit(-1);
         }
-        println "The simulator path is: " + simDir.canonicalPath;
+        println "The simulator path is as follows: " + simDir.canonicalPath;
         return simDir;
     }
     
@@ -1126,7 +1126,7 @@ public class Util {
     **/
     public static void installSimulatorApp(def app, def udid, def xcrunPath) {
         if(!isSimulatorRunning(udid, xcrunPath)) {
-            println "Error: The simulator must be running when installing an app " +
+            println "Error: The simulator must be running when an app is being installed " +
                 "on the simulator.";
             System.exit(-1);
         }
@@ -1140,7 +1140,7 @@ public class Util {
             println log;
         }
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The xcrun command failed with this error code: " + result;
             System.exit(-1);
         }
     }
@@ -1201,9 +1201,9 @@ public class Util {
         }
         
         if(result != 0) {
-            println "Error: Running the Xcrun command failed with error code: " + result;
+            println "Error: The xcrun command failed with this error code: " + result;
             if(timeout) {
-                println "The timeout may have been exceeded."
+                println "The timeout might have been exceeded."
             }
         }
         return result;

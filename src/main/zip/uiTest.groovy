@@ -42,9 +42,9 @@ if(udid) {
     // Check if only one of the simulator target properties are set.
     if(!(simName && targetOS)) {
         println "Error: Both the Simulator Name and Target OS must be specified when " +
-            "specifying the simulator target to UI test against.";
+            "the simulator target is specified for the UI test.";
         println "Explanation: This error can occur if neither Simulator Name nor Target OS are defined.";
-        println "User response: Verify the Simulator Name and Target OS, or " +
+        println "User response: Verify that the Simulator Name and Target OS, or " +
             "Device Identifier are defined for the UI Test step.";
         System.exit(-1);
     }

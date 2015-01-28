@@ -1,7 +1,7 @@
 /*
 * Licensed Materials - Property of IBM Corp.
 * IBM UrbanCode Deploy
-* (c) Copyright IBM Corporation 2011, 2014. All Rights Reserved.
+* (c) Copyright IBM Corporation 2011, 2015. All Rights Reserved.
 *
 * U.S. Government Users Restricted Rights - Use, duplication or disclosure restricted by
 * GSA ADP Schedule Contract with IBM Corp.
@@ -108,7 +108,7 @@ if(destination) {
     // Check if only the simulator name is set.
     if(!simName) {
         println "Error: The Simulator Name must be specified when " +
-            "specifying the simulator target to unit test against.";
+            "the simulator target is specified for unit testing.";
         System.exit(-1);
     }
     
