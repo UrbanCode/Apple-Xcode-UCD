@@ -2,7 +2,7 @@
 <!--
 - Licensed Materials - Property of IBM Corp.
 - IBM UrbanCode Deploy
-- (c) Copyright IBM Corporation 2011, 2014. All Rights Reserved.
+- (c) Copyright IBM Corporation 2011, 2015. All Rights Reserved.
 -
 - U.S. Government Users Restricted Rights - Use, duplication or disclosure restricted by
 - GSA ADP Schedule Contract with IBM Corp.
@@ -23,25 +23,27 @@
   <!-- Application management based steps -->
   
   <step-type name="Install Application">
-    <description>Installs the iOS application (.ipa or .app).</description>
+    <description>Installs the iOS application (an .ipa or .app file).</description>
     <properties>
       <property name="app" required="true">
         <property-ui type="textBox"
                      label="Application Path"
-                     description="The path to the iOS application (.app or .ipa file) 
-                        to install on the target. The default value is the 
-                        application property that is configured in the component 
-                        properties."
+                     description="The path to the iOS application (an .app or .ipa file) 
+                        to install on the target, for example, myApp.app or /tmp/myApp.app. 
+                        The default value is the application property that is configured 
+                        in the component properties."
                      default-value="${p:component/application}"/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        or simulator that is the installation target. If the device 
+                        or simulator to install the application on. If the device 
                         identifier is specified, then the Simulator Name and Target 
-                        OS values are ignored. If used with the Create Simulator step, 
-                        the ${p?:Create Simulator/deviceID} property can be used."
+                        OS values are not used. If the process includes the Create 
+                        Simulator step, then the deviceID output property can be 
+                        used to identify the simulator that was created, for example,
+                        ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -61,25 +63,26 @@
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="reinstall">
         <property-ui type="checkBox"
                      label="Reinstall"
-                     description="Reinstall the app. You must select this option if 
-                        the app is already installed in the target. Otherwise, the 
+                     description="Reinstalls the app. You must select this option if 
+                        the app is already installed on the target. Otherwise, the 
                         step fails."/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -151,10 +154,12 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        or simulator that is the removal target. If the device 
+                        or simulator to remove the application from. If the device 
                         identifier is specified, then the Simulator Name and Target OS 
-                        values are ignored. If used with the Create Simulator step, the 
-                        ${p?:Create Simulator/deviceID} property can be used."
+                        values are not used. If the process includes the Create Simulator 
+                        step, then the deviceID output property can be used to 
+                        identify the simulator that was created, for example,
+                        ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -174,18 +179,19 @@
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -221,16 +227,17 @@
   
   <step-type name="UI Test">
     <description>
-        Runs the specified test case that simulates a user interacting with 
+        Runs the specified test case that simulates a user who is interacting with 
         an application.
     </description>
     <properties>
       <property name="app" required="true">
         <property-ui type="textBox"
                      label="Application Path"
-                     description="The path to the iOS application (.app or .ipa file) 
-                        to test on the target. The default value is the application 
-                        property that is configured in the component properties."
+                     description="The path to the iOS application (an .app or .ipa file) 
+                        to test on the target, for example, myApp.app or /tmp/myApp.app. 
+                        The default value is the application property that is configured 
+                        in the component properties."
                      default-value="${p:component/application}"/>
       </property>
       <property name="script" required="true">
@@ -250,12 +257,14 @@
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical 
-                        device or simulator that is the test target. If you 
+                        device or simulator to run the test on. If you 
                         are testing on a device, then you must first install 
                         the app. If the device identifier is specified, then 
-                        the Simulator Name and Target OS values are ignored.
-                        If used with the Create Simulator step, the 
-                        ${p?:Create Simulator/deviceID} property can be used."
+                        the Simulator Name and Target OS values are not used.
+                        If the process includes the Create Simulator step, 
+                        then the deviceID output property can be used to 
+                        identify the simulator that was created, for example,
+                        ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -275,9 +284,9 @@
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
@@ -285,7 +294,7 @@
         <property-ui type="textBox"
                      label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
-                        specified, the default value /Applications/Xcode.app is used."
+                        specified, the default value, /Applications/Xcode.app, is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
@@ -304,9 +313,10 @@
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -314,7 +324,7 @@
         <property-ui type="textBox"
                      label="Timeout"
                      description="A timeout (in milliseconds), after which the 
-                        UI test are stopped. By default, the step does not 
+                        UI test is stopped. By default, the step does not 
                         time out."
                      hidden="true"/>
       </property>
@@ -375,7 +385,7 @@
         <property-ui type="textBox"
                      label="Workspace Name"
                      description="The name of the workspace to use for testing.
-                        If a project is specified, the workspace value is ignored."/>
+                        If a project is specified, the workspace value is not used."/>
       </property>
       <property name="scheme" required="true">
         <property-ui type="textBox"
@@ -385,20 +395,22 @@
       <property name="destination">
         <property-ui type="textAreaBox"
                      label="Destination String"
-                     description="A line-separated list or file of strings that represents 
-                        the destination to test against by using the xcodebuild syntax.
-                        For example, &quot;platform=iOS Simulator,name=iPhone,OS=7.1&quot;. 
+                     description="A line-separated list or file of targets for testing on. 
+                        Each target is a string in xcodebuild syntax, for example,
+                        the list might be similar to this string: 
+                        &quot;platform=iOS Simulator,name=iPhone,OS=8.1&quot;. 
                         If the destination string is specified, the device identifier, 
-                        simulator type, and target OS are ignored."/>
+                        simulator type, and target OS are not used."/>
       </property>
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
                      description="The unique device identifier of the physical device 
-                        or simulator that is the test target. If the device identifier is 
-                        specified, then the Simulator Name and target OS values are ignored.
-                        If used with the Create Simulator step, the 
-                        ${p?:Create Simulator/deviceID} property can be used."
+                        or simulator to run the test on. If the device identifier is 
+                        specified, then the Simulator Name and target OS values are not used.
+                        If the process includes the Create Simulator step, then the 
+                        deviceID output property can be used to identify the simulator 
+                        that was created, for example, ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -411,16 +423,16 @@
         <property-ui type="textBox"
                      label="Target OS"
                      description="The target OS, for example, 7.1 or 8.1.
-                        Note: If no target OS is specified, the default most recent value 
+                        Note: If no target OS is specified, the most recent default value 
                         is used."
                      default-value="${p?:resource/simulatorOS}"/>
       </property>
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
@@ -436,9 +448,10 @@
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -476,9 +489,10 @@
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"/>
       </property>
       <property name="additionalArgs">
@@ -486,7 +500,8 @@
                      label="Additional Arguments"
                      description="Additional arguments for the xcrun tool. The 
                         format can be a path to a file or a new line-separated list 
-                        of arguments. For example, /opt/test.properties or --show-sdk-path."/>
+                        of arguments. For example, the arguments might look like 
+                        this string: /opt/test.properties or --show-sdk-path."/>
       </property>
       <property name="timeout">
         <property-ui type="textBox"
@@ -536,16 +551,17 @@
       <property name="simDeviceType" required="true">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example,
+                     description="The simulator Device Type string from Xcode, for example,
                         iPhone 6 Plus or Resizable iPad."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -575,11 +591,13 @@
       <property name="udid">
         <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier of simulator that is 
-                        the deletion target. If the device identifier is specified, 
-                        then the Simulator Name and target OS values are ignored. 
-                        If used with the Create Simulator step, the 
-                        ${p?:Create Simulator/deviceID} property can be used."
+                     description="The unique device identifier of the simulator 
+                        to be deleted. If the device identifier is specified, 
+                        then the Simulator Name and target OS values are not used. 
+                        If the process includes the Create Simulator step, 
+                        then the deviceID output property can be used to 
+                        identify the simulator that was created, for example,
+                        ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -599,18 +617,19 @@
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -640,11 +659,13 @@
        <property name="udid">
          <property-ui type="textBox"
                      label="Device Identifier"
-                     description="The unique device identifier of simulator that is 
-                        the starting target. If the device identifier is specified, 
-                        then the Simulator Name and target OS values are ignored.
-                        If used with the Create Simulator step, the 
-                        ${p?:Create Simulator/deviceID} property can be used."
+                     description="The unique device identifier of the simulator 
+                        to start. If the device identifier is specified, 
+                        then the Simulator Name and target OS values are not used.
+                        If the process includes the Create Simulator step, 
+                        then the deviceID output property can be used to 
+                        identify the simulator that was created, for example,
+                        ${p?:Create Simulator/deviceID}."
                      default-value="${p?:resource/deviceID}"/>
       </property>
       <property name="simName">
@@ -664,9 +685,9 @@
       <property name="simDeviceType">
         <property-ui type="textBox"
                      label="Simulator Device Type"
-                     description="The name of the simulator device type. For example, 
+                     description="The simulator Device Type string from Xcode, for example, 
                         iPhone 6 Plus or Resizable iPad. Note: This property is optional. 
-                        It's used in the case of more than one simulators have the same 
+                        It's used in case more than one simulator have the same 
                         name and same target OS."
                      default-value="${p?:resource/simulatorDeviceType}"/>
       </property>
@@ -674,16 +695,17 @@
         <property-ui type="textBox"
                      label="Path to Xcode"
                      description="The path to the Xcode installation. If no value is 
-                        specified, the default value /Applications/Xcode.app is used."
+                        specified, the default value, /Applications/Xcode.app, is used."
                      default-value="${p?:resource/XcodePath}"
                      hidden="true"/>
       </property>
       <property name="xcrunPath">
         <property-ui type="textBox"
                      label="Path to xcrun"
-                     description="The path to the xcrun tool. If the 
-                        value is not specified, the value from the
-                        system path is used."
+                     description="If you have more than one version of Xcode 
+                        installed, use this property to specify the alternate path, 
+                        for example, /Applications/Xcode 1.app. If the value is not 
+                        specified, the value from the system path is used."
                      default-value="${p?:resource/xcrunPath}"
                      hidden="true"/>
       </property>
@@ -715,7 +737,7 @@
   
   <step-type name="Stop Simulator">
     <description>
-        Stops the running simulator. The step fails if no simulator is running.
+        Stops the simulator. The step fails if no simulator is running.
     </description>
     <properties/>
     <post-processing><![CDATA[
