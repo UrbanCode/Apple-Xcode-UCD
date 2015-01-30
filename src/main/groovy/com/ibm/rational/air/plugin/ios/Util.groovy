@@ -217,7 +217,7 @@ public class Util {
         ch.runCommand("Check supported platforms.", args) { proc ->
             InputStream inStream =  proc.getInputStream();
             inStream.eachLine { line ->
-                if (!simulatorSupported && line.trim() == "iPhoneSimulator") {
+                if (!simulatorSupported && line.trim().equalsIgnoreCase("iPhoneSimulator")) {
                     simulatorSupported = true;
                 }
             }
