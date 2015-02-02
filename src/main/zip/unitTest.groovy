@@ -34,14 +34,20 @@ if(project) {
     def xcodeproj;
     def projFile = project + ".xcodeproj";
     def curDir = new File(".");
+    int projFileCount = 0;
+    
     // The project name is the name of the .xcodeproj file.
     curDir.eachDir { it ->
         if(it.name == projFile) {
             xcodeproj = it.canonicalPath;
+            println "Found project entry: ${xcodeproj}."
+            projFileCount++;
         } else {
             it.eachDir { subDir ->
                 if(subDir.name == projFile) {
                     xcodeproj = subDir.canonicalPath;
+                    println "Found project entry: ${xcodeproj}."
+                    projFileCount++;
                 }
             }
         }
@@ -49,6 +55,13 @@ if(project) {
     
     if(!xcodeproj) {
         println "Error: The xcodeproj file could not be found.";
+        System.exit(-1);
+    }
+    
+    if(projFileCount > 1) {
+        println "Error: More than one xcodeproj file was found. " +
+            "Ensure that your version contains only one project " +
+            "with the ${project} name.";
         System.exit(-1);
     }
     
