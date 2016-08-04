@@ -30,7 +30,7 @@
   <tool-description>The Apple Xcode plug-in provides functionality for interacting with iOS simulators and devices.</tool-description>
   
   <!-- Do not change the release-version, the build process injects it. -->
-  <release-version>#RELEASE_VERSION#</release-version>  
+  <release-version>3.0.0</release-version>  
     
   <release-notes>
     <release-note plugin-version="1">
@@ -38,6 +38,9 @@
     </release-note>
     <release-note plugin-version="2">
       Adds support for integrating with Apple Xcode 6.
+    </release-note>
+    <release-note plugin-version="3">
+      GitHub Community Release
     </release-note>
   </release-notes>
 </pluginInfo>

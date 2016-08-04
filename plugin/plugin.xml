@@ -11,7 +11,7 @@
         xmlns:server="http://www.urbancode.com/PluginServerXMLSchema_v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <header>
-    <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="2"/>
+    <identifier id="com.ibm.rational.iOS" name="Apple Xcode" version="3"/>
     <description>
         Provides mobile support for working with Apple Xcode to deploy 
         iOS applications.
@@ -131,7 +131,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="installApp.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -216,7 +216,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="uninstallApp.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -366,7 +366,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="uiTest.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -474,7 +474,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="unitTest.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -522,7 +522,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="xcrun.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -576,7 +576,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="createSimulator.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -644,7 +644,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="deleteSimulator.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>
@@ -728,7 +728,7 @@
      ]]></post-processing>
     <command program="${GROOVY_HOME}/bin/groovy">
       <arg value="-cp"/>
-      <arg path="classes"/>
+      <arg path="classes:lib/groovy-plugin-utils-1.0.jar"/>
       <arg file="startSimulator.groovy"/>
       <arg file="${PLUGIN_INPUT_PROPS}"/>
       <arg file="${PLUGIN_OUTPUT_PROPS}"/>

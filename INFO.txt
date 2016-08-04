@@ -1,5 +1,0 @@
-----------------------------RTW binary file----------------------------
-File name: mobiledevice
-RTW Version: 8.6.0RTWecO86-I20140715_1358
-Plug-in Version: com.ibm.rational.test.mobile.ios.buildchain_1.3.0.v20140707_1439
-Install Location: https://constellation.ratl.swg.usma.ibm.com/RTWecO/86/I/rtw-offering/

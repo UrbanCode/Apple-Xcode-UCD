@@ -56,5 +56,6 @@
         
     <migrate-command name="Stop Simulator" />
   </migrate>
-  
+  <migrate to-version="3">
+  </migrate>
 </plugin-upgrade>
