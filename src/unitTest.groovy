@@ -11,7 +11,7 @@ import com.urbancode.air.AirPluginTool;
 import com.ibm.rational.air.plugin.ios.Util;
 
 def apTool = new AirPluginTool(this.args[0], this.args[1]);
-final def props = apTool.getStepProperties();
+def props = apTool.getStepProperties();
 
 def project = props['project']
 def workspace = props['workspace']
