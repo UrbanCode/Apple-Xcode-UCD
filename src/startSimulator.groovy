@@ -12,10 +12,10 @@
 * configuration before start up.
 **/
 
-import com.urbancode.air.AirPluginTool;
+import com.urbancode.air.plugin.helper.NewAirPluginTool;
 import com.ibm.rational.air.plugin.ios.Util;
 
-def apTool = new AirPluginTool(this.args[0], this.args[1]);
+def apTool = new NewAirPluginTool(this.args[0], this.args[1]);
 final def props = apTool.getStepProperties();
 
 def udid = props['udid']
