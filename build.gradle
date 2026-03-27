@@ -125,7 +125,7 @@ tasks.register('copyCompiledClasses', Copy) {
 tasks.register('dist', Zip) {
     dependsOn 'assemblePlugin', 'copyLibs', 'copyGroovySources', 'copyCompiledClasses'
     
-    archiveFileName = "${pluginName}-v${version}.zip"
+    archiveFileName = "${pluginName}-${version}.zip"
     destinationDirectory = file('releases')
     
     from layout.buildDirectory.dir("plugin")
