@@ -12,7 +12,7 @@ import com.urbancode.air.CommandHelper;
 import com.ibm.rational.air.plugin.ios.Util;
 
 def apTool = new AirPluginTool(this.args[0], this.args[1]);
-final def props = apTool.getStepProperties();
+def props = apTool.getStepProperties();
 
 def app = props['app']
 def script = props['script']
