@@ -1,0 +1,149 @@
+/*
+ * © Copyright IBM Corporation 2016.
+ * This is licensed under the following license.
+ * The Eclipse Public 1.0 License (http://www.eclipse.org/legal/epl-v10.html)
+ * U.S. Government Users Restricted Rights: Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+ */
+
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+group = 'com.ibm.urbancode'
+version = project.hasProperty('pluginVersion') ? project.pluginVersion : 'dev'
+
+def pluginName = 'Apple-Xcode-UCD'
+
+repositories {
+    mavenCentral()
+}
+
+// Source sets configuration
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/groovy']
+        }
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src']
+            exclude '**/groovy/**'
+            exclude '**/java/**'
+            exclude '**/test/**'
+        }
+    }
+}
+
+dependencies {
+    // Runtime Dependencies
+    implementation 'com.ibm.urbancode.plugins:groovy-plugin-utils:+'
+    
+    // Build Dependencies - Groovy
+    implementation 'org.codehaus.groovy:groovy-all:+'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Task to assemble the plugin
+tasks.register('assemblePlugin', Copy) {
+    dependsOn classes
+    
+    into layout.buildDirectory.dir("plugin")
+    
+    // Copy plugin descriptor files
+    from('plugin') {
+        include 'info.xml'
+        include 'upgrade.xml'
+        include 'plugin.xml'
+    }
+    
+    // Copy source scripts (excluding groovy/java/test directories)
+    from('src') {
+        exclude '**/groovy/**'
+        exclude '**/java/**'
+        exclude '**/test/**'
+    }
+    
+    // Copy license
+    into('license') {
+        from('license') {
+            include 'EPL.txt'
+        }
+    }
+    
+    // Copy documentation
+    into('doc') {
+        from('doc') {
+            include 'HowTo.html'
+        }
+    }
+}
+
+// Copy libraries to plugin
+tasks.register('copyLibs', Copy) {
+    dependsOn configurations.runtimeClasspath
+    
+    into layout.buildDirectory.dir("plugin/lib")
+    
+    from(configurations.runtimeClasspath) {
+        // Include all runtime dependencies
+    }
+}
+
+// Copy Groovy source files to classes directory (for runtime interpretation)
+tasks.register('copyGroovySources', Copy) {
+    into layout.buildDirectory.dir("plugin/classes")
+    
+    from('src/groovy') {
+        include '**/*.groovy'
+    }
+}
+
+// Copy compiled Java classes
+tasks.register('copyCompiledClasses', Copy) {
+    dependsOn compileJava
+    
+    into layout.buildDirectory.dir("plugin/classes")
+    
+    from(sourceSets.main.java.classesDirectory) {
+        include '**/*.class'
+    }
+}
+
+// Create the plugin distribution zip
+tasks.register('dist', Zip) {
+    dependsOn 'assemblePlugin', 'copyLibs', 'copyGroovySources', 'copyCompiledClasses'
+    
+    archiveFileName = "${pluginName}-${version}.zip"
+    destinationDirectory = file('releases')
+    
+    from layout.buildDirectory.dir("plugin")
+}
+
+// Main build task
+tasks.register('buildPlugin') {
+    dependsOn 'dist'
+    doLast {
+        println "Plugin build complete!"
+    }
+}
+
+// Clean task enhancement
+clean {
+    delete 'releases'
+    delete 'lib'
+}
+
+// Default task
+defaultTasks 'buildPlugin'
