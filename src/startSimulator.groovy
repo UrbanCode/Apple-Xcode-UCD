@@ -56,7 +56,7 @@ def xcodeApp = Util.verifyXcodePath(xcode);
 
 def simulatorApp = new String(File.separator + "Contents" + File.separator + "Developer" +
     File.separator + "Applications" + File.separator +
-    "iOS Simulator.app");
+    "Simulator.app");
 
 def simulatorAppPath;
 try {
@@ -89,4 +89,3 @@ for (int i = 0; i < startupRetries; i++){
 
 println "The simulator has started.";
 System.exit(0);
-
